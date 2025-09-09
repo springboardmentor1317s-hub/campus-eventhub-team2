@@ -1,38 +1,119 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+body {
+  font-family: Arial, sans-serif;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #0c67a0;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+}
+
+.form-container {
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  width: 330px;
+}
+
+/* Toggle buttons */
+.form-toggle {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.form-toggle button {
+  width: 50%;
+  padding: 10px;
+  background: linear-gradient(to right, #cfd9df, #e2ebf0);
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 10px 10px 0 0;
+  transition: 0.3s;
+}
+
+.form-toggle .active {
+  background: linear-gradient(135deg, #0c67a0, #033452);
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.form {
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.form-title {
+  text-align: center;
+  margin-bottom: 5px;
+  color: #033452;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.form input,
+.form select {
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form button {
+  padding: 10px;
+  background: linear-gradient(135deg, #0c67a0, #033452);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.form button:hover {
+  opacity: 0.9;
+}
+
+.form a {
+  color: #007bff;
+  text-decoration: none;
+  margin-bottom: 10px;
+  text-align: right;
+  font-size: 13px;
+}
+
+.form p {
+  text-align: center;
+  font-size: 14px;
+}
+
+.demo-box {
+  margin: 15px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.demo-box h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #033452;
 }
