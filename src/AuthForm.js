@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import "./App.css";
+import AdminDashboard from "./adminDashboard"; // ✅ Dashboard import
 
 export default function AuthForm() {
     const [isLogin, setIsLogin] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ Login state
+
+    // ✅ login auth logic
+    if (isAuthenticated) {
+        return <AdminDashboard />;
+    }
 
     return (
         <div className="container">
@@ -33,7 +40,9 @@ export default function AuthForm() {
                         <input type="password" placeholder="Password" />
 
                         <a href="#">Forgot Password?</a>
-                        <button>Sign In</button>
+                        
+                        {/* ✅ Login hone par dashboard khul jaayega */}
+                        <button onClick={() => setIsAuthenticated(true)}>Sign In</button>
 
                         {/* Demo Credentials Section */}
                         <div className="demo-box">
@@ -54,9 +63,9 @@ export default function AuthForm() {
                         </div>
 
                         <p>
-                            Don&apos;t have an Account?{" "}
+                            Don't have an Account?{" "}
                             <a href="#" onClick={() => setIsLogin(false)}>
-                                Sign Up
+                                Register Now
                             </a>
                         </p>
                     </div>

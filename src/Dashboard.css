@@ -1,0 +1,203 @@
+/* Reset default */
+body,
+html,
+#root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Main container to span full width */
+.dashboard-container {
+    font-family: Arial, sans-serif;
+    background: #f7fafd;
+    color: #222;
+    min-height: 100vh;
+    width: 100vw;
+    padding: 0;
+}
+
+/* Header - fixed width and alignment */
+.dashboard-header {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 60px;
+    background: #fff;
+    border-bottom: 1px solid #ececec;
+    height: 72px;
+}
+
+.logo-title .logo {
+    font-size: 2rem;
+    margin-right: 8px;
+}
+
+.logo-title .title {
+    font-weight: bold;
+    font-size: 1.4rem;
+    color: #731ddb;
+}
+
+.dashboard-header nav {
+    display: flex;
+    gap: 22px;
+}
+
+.dashboard-header nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: 1.05rem;
+    padding: 2px 0;
+}
+
+.dashboard-header nav .active {
+    color: #731ddb;
+    text-decoration: underline;
+}
+
+.user-info {
+    background: #f2f2fc;
+    padding: 8px 18px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Main content - center and full width */
+main {
+    margin: 0 auto;
+    max-width: 1480px;
+    width: 100%;
+    padding: 24px 42px;
+}
+
+/* Stats cards - responsive grid */
+.stats-cards {
+    display: flex;
+    gap: 32px;
+    margin: 36px 0 18px 0;
+    justify-content: flex-start;
+}
+
+.card {
+    flex: 1;
+    min-width: 215px;
+    max-width: 320px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(60, 0, 100, 0.07);
+    font-size: 1.11rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card span {
+    font-size: 2.1rem;
+    display: block;
+}
+
+.card.blue {
+    border: 2px solid #2152ff;
+}
+
+.card.green {
+    border: 2px solid #19c37d;
+}
+
+.card.purple {
+    border: 2px solid #711aff;
+}
+
+.card.orange {
+    border: 2px solid #fa8c16;
+}
+
+.dashboard-tabs {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.dashboard-tabs button {
+    background: #f1f1f9;
+    border: none;
+    padding: 14px 38px;
+    border-radius: 6px;
+    color: #731ddb;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.dashboard-tabs button.active {
+    background: #e5dbfb;
+    border-bottom: 3px solid #731ddb;
+}
+
+.dashboard-main {
+    display: flex;
+    gap: 40px;
+    margin-top: 18px;
+}
+
+.recent-events,
+.quick-actions {
+    background: #fff;
+    border-radius: 12px;
+    padding: 38px 28px;
+    flex: 1;
+    box-shadow: 0 1px 6px rgba(60, 0, 100, 0.08);
+    min-height: 195px;
+}
+
+.quick-actions h3 {
+    margin-bottom: 22px;
+}
+
+.create-event-btn {
+    background: linear-gradient(90deg, #2152ff, #731ddb);
+    color: #fff;
+    padding: 15px 0;
+    border: none;
+    font-weight: bold;
+    border-radius: 7px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1.06rem;
+    margin-bottom: 18px;
+}
+
+.quick-actions button {
+    background: #f2f2fc;
+    color: #222;
+    border: none;
+    border-radius: 7px;
+    padding: 13px 0;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    cursor: pointer;
+    width: 100%;
+}
+
+@media (max-width: 1280px) {
+    main {
+        max-width: 98vw;
+        padding: 22px 12px;
+    }
+
+    .stats-cards {
+        gap: 20px;
+    }
+
+    .dashboard-main {
+        gap: 18px;
+    }
+}
