@@ -5,7 +5,7 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
-  background-color: #c9eef8;
+  background-color: #f7fafd;
 }
 
 .container {
@@ -44,7 +44,7 @@ body {
 }
 
 .form-toggle .active {
-  background: linear-gradient(135deg, #0c67a0, #033452);
+  background: linear-gradient(135deg, #0c67a0, #9226b0);
   color: white;
 }
 
@@ -77,7 +77,7 @@ body {
 
 .form button {
   padding: 10px;
-  background: linear-gradient(135deg, #0c67a0, #033452);
+  background: linear-gradient(135deg, #0c67a0, #9226b0);
   color: white;
   font-weight: bold;
   border: none;
