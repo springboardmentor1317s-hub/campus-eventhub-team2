@@ -1,0 +1,25 @@
+.registrations-container {
+    padding: 20px;
+}
+
+.registrations-container h2 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.registrations-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.registrations-table th,
+.registrations-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.registrations-table th {
+    background: #6a0dad;
+    color: white;
+}
