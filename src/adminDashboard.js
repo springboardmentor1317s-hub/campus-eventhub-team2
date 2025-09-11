@@ -1,7 +1,7 @@
 import React from 'react';
 import './Dashboard.css';
 
-// Profile Card component
+// Profile Card component.
 function ProfileCard({ name, email, onLogout }) {
     return (
         <div className="profile-card">
@@ -17,7 +17,6 @@ function ProfileCard({ name, email, onLogout }) {
     );
 }
 
-// Dashboard main component
 function Dashboard() {
     // Fake user data, backend se lana ho toh yaha dynamic la sakte hain
     const user = {
@@ -25,7 +24,6 @@ function Dashboard() {
         email: "anas@gmail.com"
     };
 
-    // Logout function
     const handleLogout = () => {
         alert("Logged out!"); 
     };
