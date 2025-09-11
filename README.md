@@ -1,6 +1,3 @@
-# Clone --
-
-https://github.com/mdanassaifi/login-register-page-usingReact.git 
 
 # Getting Started with Create React App
 
