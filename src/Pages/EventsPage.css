@@ -13,15 +13,12 @@
 .events-grid {
     display: flex;
     flex-wrap: wrap;
-    /* cards next line pe chale jayenge agar jagah kam ho */
     gap: 20px;
     justify-content: center;
-    /* center align */
 }
 
 .event-card {
     flex: 1 1 300px;
-    /* min width 300px, responsive resize */
     max-width: 320px;
     background: #fff;
     border: 1px solid #eee;
@@ -49,23 +46,45 @@
     color: #555;
 }
 
-.register-btn {
-    margin-top: 12px;
-    padding: 8px 14px;
-    background: linear-gradient(90deg, #2152ff, #9226b0);
-    color: #fff;
+.event-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    flex: 1;
+    padding: 8px 10px;
     border: none;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
-    transition: background 0.25s ease, transform 0.1s ease;
+    transition: background 0.2s ease, transform 0.1s ease;
+    font-weight: 500;
+    color: #fff;
 }
 
-.register-btn:hover {
+.btn.edit {
+    background: #2575fc;
+}
+
+.btn.edit:hover {
     background: #1a5ed7;
-    transform: scale(1.05);
 }
 
-.register-btn:active {
-    transform: scale(0.95);
+.btn.stats {
+    background: #00b894;
+}
+
+.btn.stats:hover {
+    background: #009975;
+}
+
+.btn.delete {
+    background: #ff4d4f;
+}
+
+.btn.delete:hover {
+    background: #d9363e;
 }

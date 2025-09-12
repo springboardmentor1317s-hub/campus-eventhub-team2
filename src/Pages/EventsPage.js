@@ -29,39 +29,12 @@ const events = [
         organizer: "AI Club",
         fees: "₹500",
     },
-    {
-        id: 4,
-        name: "Cultural Night",
-        date: "30 Sept 2025",
-        time: "06:00 PM",
-        location: "Open Ground",
-        organizer: "Cultural Committee",
-        fees: "₹100",
-    },
-    {
-        id: 5,
-        name: "Hackathon 24hr",
-        date: "05 Oct 2025",
-        time: "09:00 AM",
-        location: "Innovation Hub",
-        organizer: "Coding Club",
-        fees: "₹300",
-    },
-    {
-        id: 6,
-        name: "Sports Meet",
-        date: "10 Oct 2025",
-        time: "08:00 AM",
-        location: "Main Stadium",
-        organizer: "Sports Department",
-        fees: "₹150",
-    },
 ];
 
 function EventsPage() {
     return (
         <div className="events-container">
-            <h2 className="events-title">Upcoming Events</h2>
+            <h2 className="events-title">Manage Your Events</h2>
             <div className="events-grid">
                 {events.map((event) => (
                     <div className="event-card" key={event.id}>
@@ -71,7 +44,12 @@ function EventsPage() {
                         <p><strong>Location:</strong> {event.location}</p>
                         <p><strong>Organizer:</strong> {event.organizer}</p>
                         <p><strong>Fees:</strong> {event.fees}</p>
-                        <button className="register-btn">Register</button>
+
+                        <div className="event-actions">
+                            <button className="btn edit">Edit</button>
+                            <button className="btn stats">View Stats</button>
+                            <button className="btn delete">Delete</button>
+                        </div>
                     </div>
                 ))}
             </div>
