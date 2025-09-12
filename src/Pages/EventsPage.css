@@ -52,7 +52,7 @@
 .register-btn {
     margin-top: 12px;
     padding: 8px 14px;
-    background: #2575fc;
+    background: linear-gradient(90deg, #2152ff, #9226b0);
     color: #fff;
     border: none;
     border-radius: 6px;
