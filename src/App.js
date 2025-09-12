@@ -9,6 +9,7 @@ import Registrations from './Pages/Registrations';
 import ExportData from './Pages/ExportData';
 import AuthForm from './AuthForm';
 import './App.css';
+import EventsPage from './Pages/EventsPage';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/dashboard/create-event" element={<CreateEvent />} />
         <Route path="/dashboard/registrations" element={<Registrations />} />
         <Route path="/dashboard/export" element={<ExportData />} />
+        <Route path="/events" element={<EventsPage />} />
       </Routes>
     </BrowserRouter>
   );
