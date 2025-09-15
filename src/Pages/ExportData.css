@@ -1,0 +1,17 @@
+.export-container {
+    padding: 20px;
+}
+
+.export-btn {
+    background-color: #6a0dad;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.export-btn:hover {
+    background-color: #4b0082;
+}

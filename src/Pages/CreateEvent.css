@@ -1,0 +1,23 @@
+.create-event-container {
+    padding: 20px;
+}
+
+.create-event-container h2 {
+    color: #333;
+}
+
+.create-event-container input {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+
+.create-event-container button {
+    background: #6a0dad;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
