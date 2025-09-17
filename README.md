@@ -28,7 +28,7 @@ Welcome to the **Campus EventHub** project! This platform is designed to streaml
 ---
 
 ## 📁 Project Structure
-
+```pgsql
 campus-eventhub-team2/
 ├── backend/ # Backend server code
 ├── frontend/ # Frontend React application
@@ -37,7 +37,7 @@ campus-eventhub-team2/
 ├── .gitignore # Git ignore rules
 ├── package.json # Project metadata and dependencies
 └── README.md # Project documentation
-
+```
 ## ⚙️ Installation
 
 ### Prerequisites
