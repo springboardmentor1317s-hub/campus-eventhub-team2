@@ -148,6 +148,17 @@ export default function Dashboard() {
     alignSelf: "start",
   };
 
+  // ✅ Shared dropdown styles with hover
+  const selectStyle = {
+    padding: "8px 12px",
+    borderRadius: "6px",
+    border: "1px solid #0996e6",
+    fontSize: "1rem",
+    color: "#14476f",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  };
+
   return (
     <div style={containerOuter}>
       <div style={containerInner}>
@@ -157,105 +168,178 @@ export default function Dashboard() {
         <h2>Welcome, {user.name}!</h2>
 
         {/* Admin Dashboard */}
-        {user.role === "college_admin" && (
-          <>
-            <div style={statsGrid}>
-              <div style={statCard}>📈 View Analytics</div>
-              <div style={statCard}>📅 Total Events: {stats.totalEvents}</div>
-              <div style={statCard}>👥 Active Users: {stats.activeUsers}</div>
-              <div style={statCard}>📝 Total Registrations: {stats.totalRegistrations}</div>
-              <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
-            </div>
+{user.role === "college_admin" && (
+  <>
+    <div style={statsGrid}>
+      <div style={statCard}>📈 View Analytics</div>
+      <div style={statCard}>📅 Total Events: {stats.totalEvents}</div>
+      <div style={statCard}>👥 Active Users: {stats.activeUsers}</div>
+      <div style={statCard}>📝 Total Registrations: {stats.totalRegistrations}</div>
+      <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
+    </div>
 
-            <div style={{ marginTop: "2rem" }}>
-              <h3>📅 All Events</h3>
-              <div style={{ marginBottom: "1rem" }}>
-                <label style={{ marginRight: "10px" }}>Sort by:</label>
-                <select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
-                  <option value="date">Start Date</option>
-                  <option value="category">Category (A-Z)</option>
-                </select>
+    <div style={{ marginTop: "2rem" }}>
+      <h3>📅 All Events</h3>
 
-                <label style={{ margin: "0 10px" }}>Filter by:</label>
-                <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-                  <option value="all">All</option>
-                  <option value="sports">Sports</option>
-                  <option value="hackathon">Hackathon</option>
-                  <option value="cultural">Cultural</option>
-                  <option value="workshop">Workshop</option>
-                </select>
+      {/* ✅ Styled Sorting + Filtering */}
+      <div
+        style={{
+          marginBottom: "2.5rem",
+          fontSize: "1.1rem",
+          fontWeight: "500",
+          color: "#0996e6",
+        }}
+      >
+        <label style={{ marginRight: "12px" }}>Sort by:</label>
+        <select
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+          style={selectStyle}
+          onMouseEnter={(e) => (e.target.style.border = "1px solid #007acc")}
+          onMouseLeave={(e) => (e.target.style.border = "1px solid #0996e6")}
+        >
+          <option value="date">Start Date</option>
+          <option value="category">Category (A-Z)</option>
+        </select>
+
+        <label style={{ margin: "0 12px" }}>Filter by:</label>
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          style={selectStyle}
+          onMouseEnter={(e) => (e.target.style.border = "1px solid #007acc")}
+          onMouseLeave={(e) => (e.target.style.border = "1px solid #0996e6")}
+        >
+          <option value="all">All</option>
+          <option value="sports">Sports</option>
+          <option value="hackathon">Hackathon</option>
+          <option value="cultural">Cultural</option>
+          <option value="workshop">Workshop</option>
+        </select>
+      </div>
+
+      {sortedEvents.length === 0 ? (
+        <p>No events found.</p>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: "20px",
+            marginTop: "1rem",
+          }}
+        >
+          {sortedEvents.map((event) => (
+            <div
+              key={event._id}
+              style={{
+                background: "#fff",
+                borderRadius: "16px",
+                padding: "18px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                transition: "all 0.3s ease",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.boxShadow =
+                  "0 6px 16px rgba(0,0,0,0.2)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.boxShadow =
+                  "0 2px 8px rgba(0,0,0,0.1)")
+              }
+            >
+              <strong style={{ fontSize: "1.25rem", color: "#14476f" }}>
+                {event.title}
+              </strong>
+              <span
+                style={{
+                  background: "#e4f1fb",
+                  color: "#2384cb",
+                  marginLeft: "10px",
+                  padding: "3px 12px",
+                  borderRadius: "18px",
+                  fontSize: "0.98rem",
+                }}
+              >
+                {event.category}
+              </span>
+
+              <div
+                style={{
+                  margin: "12px 0 14px 0",
+                  color: "#666",
+                  fontSize: "1.04rem",
+                }}
+              >
+                📍 {event.location || "N/A"}
               </div>
 
-              {sortedEvents.length === 0 ? (
-                <p>No events found.</p>
-              ) : (
-                <ul style={{ marginTop: "1rem", paddingLeft: 0, listStyle: "none" }}>
-                  {sortedEvents.map((event) => (
-                    <li key={event._id} style={{ ...eventCard, marginBottom: "20px" }}>
-                      <strong style={{ fontSize: "1.25rem", color: "#14476f" }}>{event.title}</strong>{" "}
-                      <span
-                        style={{
-                          background: "#e4f1fb",
-                          color: "#2384cb",
-                          marginLeft: "10px",
-                          padding: "3px 12px",
-                          borderRadius: "18px",
-                          fontSize: "0.98rem",
-                        }}
-                      >
-                        {event.category}
-                      </span>
-                      <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>
-                        📍 {event.location || "N/A"}
-                      </div>
-                      <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
-                        {new Date(event.startDate).toLocaleDateString()} -{" "}
-                        {new Date(event.endDate).toLocaleDateString()}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div
+                style={{
+                  color: "#888",
+                  fontSize: "0.97rem",
+                  marginBottom: "8px",
+                }}
+              >
+                {new Date(event.startDate).toLocaleDateString()} -{" "}
+                {new Date(event.endDate).toLocaleDateString()}
+              </div>
             </div>
-          </>
-        )}
+          ))}
+        </div>
+      )}
+    </div>
+  </>
+)}
+
 
         {/* Student Dashboard */}
         {user.role === "student" && (
           <>
+            {/* ✅ Styled Sorting + Filtering */}
             <div
               style={{
-                display: "flex",
-                gap: "2rem",
-                alignItems: "center",
-                margin: "32px 0 20px 0",
+                marginBottom: "1rem",
+                fontSize: "1.1rem",
+                fontWeight: "500",
+                color: "#0996e6",
               }}
             >
-              <div>
-                <label style={{ marginRight: "10px", fontWeight: 500 }}>Sort by:</label>
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  style={{ padding: "8px", borderRadius: "6px", border: "1px solid #bcc" }}
-                >
-                  <option value="date">Start Date</option>
-                  <option value="category">Category (A-Z)</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ marginRight: "10px", fontWeight: 500 }}>Filter by:</label>
-                <select
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  style={{ padding: "8px", borderRadius: "6px", border: "1px solid #bcc" }}
-                >
-                  <option value="all">All</option>
-                  <option value="sports">Sports</option>
-                  <option value="hackathon">Hackathon</option>
-                  <option value="cultural">Cultural</option>
-                  <option value="workshop">Workshop</option>
-                </select>
-              </div>
+              <label style={{ marginRight: "12px" }}>Sort by:</label>
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                style={selectStyle}
+                onMouseEnter={(e) =>
+                  (e.target.style.border = "1px solid #007acc")
+                }
+                onMouseLeave={(e) =>
+                  (e.target.style.border = "1px solid #0996e6")
+                }
+              >
+                <option value="date">Start Date</option>
+                <option value="category">Category (A-Z)</option>
+              </select>
+
+              <label style={{ margin: "0 12px" }}>Filter by:</label>
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                style={selectStyle}
+                onMouseEnter={(e) =>
+                  (e.target.style.border = "1px solid #007acc")
+                }
+                onMouseLeave={(e) =>
+                  (e.target.style.border = "1px solid #0996e6")
+                }
+              >
+                <option value="all">All</option>
+                <option value="sports">Sports</option>
+                <option value="hackathon">Hackathon</option>
+                <option value="cultural">Cultural</option>
+                <option value="workshop">Workshop</option>
+              </select>
             </div>
 
             {/* Upcoming Events Cards */}
@@ -270,7 +354,9 @@ export default function Dashboard() {
                   {sortedEvents.map((event) => (
                     <div key={event._id} style={eventCard}>
                       <div>
-                        <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>{event.title}</strong>
+                        <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>
+                          {event.title}
+                        </strong>
                         <span
                           style={{
                             background: "#e4f1fb",
@@ -284,10 +370,22 @@ export default function Dashboard() {
                           {event.category}
                         </span>
                       </div>
-                      <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>
+                      <div
+                        style={{
+                          margin: "10px 0 14px 0",
+                          color: "#666",
+                          fontSize: "1.04rem",
+                        }}
+                      >
                         📍 {event.location || "N/A"}
                       </div>
-                      <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
+                      <div
+                        style={{
+                          color: "#888",
+                          fontSize: "0.97rem",
+                          marginBottom: "8px",
+                        }}
+                      >
                         {new Date(event.startDate).toLocaleDateString()} -{" "}
                         {new Date(event.endDate).toLocaleDateString()}
                       </div>
@@ -309,7 +407,9 @@ export default function Dashboard() {
                 <div style={eventCardGrid}>
                   {registeredEvents.map((event) => (
                     <div key={event._id} style={eventCardRegistered}>
-                      <strong style={{ fontSize: "1.18rem", color: "#137d52" }}>{event.title}</strong>
+                      <strong style={{ fontSize: "1.18rem", color: "#137d52" }}>
+                        {event.title}
+                      </strong>
                       <span
                         style={{
                           background: "#e9fff0",
@@ -322,7 +422,13 @@ export default function Dashboard() {
                       >
                         {event.category}
                       </span>
-                      <div style={{ margin: "10px 0 10px 0", color: "#16623c", fontSize: "1.03rem" }}>
+                      <div
+                        style={{
+                          margin: "10px 0 10px 0",
+                          color: "#16623c",
+                          fontSize: "1.03rem",
+                        }}
+                      >
                         📍 {event.location || "N/A"}
                       </div>
                       <div style={{ color: "#488a60", fontSize: "0.97rem" }}>
@@ -348,39 +454,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-
-// ✅ Styles
-const statsGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-  gap: "1rem",
-  marginTop: "1.5rem",
-};
-
-const statCard = {
-  background: "#3498db",
-  color: "white",
-  padding: "1rem",
-  borderRadius: "10px",
-  textAlign: "center",
-  fontWeight: "bold",
-};
-
-const eventItem = {
-  background: "#f9f9f9",
-  padding: "1rem",
-  borderRadius: "8px",
-  marginBottom: "10px",
-  boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-};
-
-const registerBtn = {
-  marginTop: "0.5rem",
-  padding: "6px 12px",
-  backgroundColor: "#3498db",
-  color: "white",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-};

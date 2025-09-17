@@ -1,8 +1,7 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Navbar() {
   const navigate = useNavigate();
-  const location = useLocation(); // ✅ get current page
   const isLoggedIn = localStorage.getItem("token");
   const name = localStorage.getItem("name");
   const role = localStorage.getItem("role");
@@ -12,56 +11,39 @@ function Navbar() {
     navigate("/login");
   };
 
-  // ✅ Pages where Events should be hidden if logged out
-  const hideEventsPages = ["/", "/login", "/register"];
-
   return (
-    <nav
-      style={{
-        padding: "1rem 2rem",
-        background: "#2c3e50",
-        display: "flex",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        gap: "1.5rem",
-      }}
-    >
+    <nav style={navbarStyle}>
       {/* Always visible */}
-      <Link to="/" style={linkStyle}>
+      <Link to="/" style={linkStyle} className="nav-link">
         Home
       </Link>
 
-      {/* ✅ Show Events only if logged in OR logged out but not on Home/Login/Register */}
-      {(isLoggedIn || (!isLoggedIn && !hideEventsPages.includes(location.pathname))) && (
-        <Link to="/events" style={linkStyle}>
-          Events
-        </Link>
-      )}
-
+      {/* If NOT logged in */}
       {!isLoggedIn && (
         <>
-          <Link to="/login" style={linkStyle}>
+          <Link to="/login" style={linkStyle} className="nav-link">
             Login
           </Link>
-          <Link to="/register" style={linkStyle}>
+          <Link to="/register" style={linkStyle} className="nav-link">
             Register
           </Link>
         </>
       )}
 
+      {/* If Logged in */}
       {isLoggedIn && (
         <>
-          <Link to="/dashboard" style={linkStyle}>
+          <Link to="/dashboard" style={linkStyle} className="nav-link">
             Dashboard
           </Link>
           {role === "college_admin" && (
-            <Link to="/create-event" style={linkStyle}>
+            <Link to="/create-event" style={linkStyle} className="nav-link">
               Create Event
             </Link>
           )}
 
           {/* User Info */}
-          <div style={{ textAlign: "right", color: "white" }}>
+          <div style={{ textAlign: "right", color: "white", fontSize: "1rem" }}>
             <div style={{ fontWeight: "bold" }}>👋 {name}</div>
           </div>
 
@@ -74,22 +56,51 @@ function Navbar() {
   );
 }
 
-// ✅ Styles
+// ✅ Navbar Styles
+const navbarStyle = {
+  padding: "1rem 2rem",
+  background: "#0996e6",
+  display: "flex",
+  justifyContent: "flex-end",
+  alignItems: "center",
+  gap: "1.5rem",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+  fontFamily: "Segoe UI, sans-serif",
+};
+
 const linkStyle = {
   color: "white",
   textDecoration: "none",
-  fontWeight: "500",
-  transition: "0.3s",
+  fontWeight: "600",
+  fontSize: "1.05rem",
+  transition: "all 0.3s ease",
 };
+
+// ✅ Hover styles via CSS injection
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.innerHTML = `
+    .nav-link:hover {
+      color: #dff6ff !important;
+      text-decoration: underline;
+    }
+    button:hover {
+      background: #c0392b !important; /* Darker red for logout hover */
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 const logoutBtn = {
   background: "#e74c3c",
   color: "white",
   border: "none",
-  padding: "6px 12px",
+  padding: "8px 14px",
   borderRadius: "6px",
   cursor: "pointer",
   fontWeight: "bold",
+  fontSize: "0.95rem",
+  transition: "background 0.3s ease",
 };
 
 export default Navbar;
