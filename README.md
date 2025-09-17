@@ -84,8 +84,8 @@ campus-eventhub-team2/
 
    Frontend Tests:
    ```
-  cd frontend
-  npm test
+     cd frontend
+     npm test
    ```
 
    Backend Tests:
