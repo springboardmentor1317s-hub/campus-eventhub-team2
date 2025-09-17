@@ -51,49 +51,49 @@ campus-eventhub-team2/
    git clone https://github.com/springboardmentor1317s-hub/campus-eventhub-team2.git
    cd campus-eventhub-team2
    ```
-2.Set up the backend:
- ```bash
-  cd backend
-  npm install
-```
-Create a .env file in the backend folder:
-```ini
-  MONGO_URI=your_mongodb_connection_string
-  JWT_SECRET=your_jwt_secret
-```
-3.Set up the frontend:
-```
-cd ../frontend
-npm install
-```
+   2.Set up the backend:
+    ```bash
+     cd backend
+     npm install
+   ```
+   Create a .env file in the backend folder:
+   ```ini
+     MONGO_URI=your_mongodb_connection_string
+     JWT_SECRET=your_jwt_secret
+   ```
+   3.Set up the frontend:
+   ```
+   cd ../frontend
+   npm install
+   ```
 
-##Run the application:
+   ##Run the application:
 
-  Start backend server:
-  ```
-    cd ../backend
-    npm start
-  ```
+     Start backend server:
+     ```
+       cd ../backend
+       npm start
+     ```
 
-  Start frontend server:
-  ```
-    cd ../frontend
-    npm start
-  ```
-##🧪 Running Tests
+     Start frontend server:
+     ```
+       cd ../frontend
+       npm start
+     ```
+   ##🧪 Running Tests
 
-Frontend Tests:
-```
+   Frontend Tests:
+   ```
   cd frontend
   npm test
-```
+   ```
 
-Backend Tests:
-```
-  cd backend
-  npm test
-```
-📄 License
+   Backend Tests:
+   ```
+     cd backend
+     npm test
+   ```
+   📄 License
 
-This project is licensed under the MIT License - see the LICENSE
- file for details.
+   This project is licensed under the MIT License - see the LICENSE
+    file for details.
