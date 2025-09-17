@@ -6,8 +6,8 @@ Welcome to the **Campus EventHub** project! This platform is designed to streaml
 
 ## 🚀 Features
 
-### For Teachers:
-- **Secure Login:** Teachers can log in securely to manage events.
+### For Admin:
+- **Secure Login:** Admin can log in securely to manage events.
 - **Event Management:** Add, edit, and delete events with details like title, description, date, time, venue, and category.
 - **Categorization:** Tag events (e.g., technical, cultural, sports) for easy organization.
 
