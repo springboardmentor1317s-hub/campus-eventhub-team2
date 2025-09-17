@@ -18,7 +18,7 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow-x: hidden;  /* prevent horizontal scroll */
-  background: #fff;    /* remove default black bg */
+  background: #4a3e3e;    /* remove default black bg */
 }
 a {
   font-weight: 500;
@@ -31,10 +31,8 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
-  min-height: 90vh;
+  height: 100vh;
 }
 
 h1 {

@@ -8,8 +8,7 @@ const Home = () => {
         padding: 0,
         backgroundColor: " #e0c3fc", // ✅ remove black bg, fallback white
         overflowX: "hidden", // ✅ no horizontal scroll
-     }}>
-      {/* Hero Section */}
+     }}>      {/* Hero Section */}
       <section
     style={{
         width: "100vw",            // full width of viewport
@@ -18,7 +17,7 @@ const Home = () => {
         padding: 0,
         // background: "linear-gradient(135deg, #f3e8ff 0%, #e0c3fc 100%)",
         backgroundImage:
-              "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('sp.jpg')",
+              "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('ap.jpg')",
         backgroundSize: "cover",   // makes sure image covers whole area
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
