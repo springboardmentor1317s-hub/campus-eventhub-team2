@@ -90,12 +90,20 @@ export default function Dashboard() {
     flexDirection: "column",
   };
 
-  const statsGrid = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1.7rem",
-    marginTop: "2.2rem",
-  };
+const statsGrid = {
+  background: "#fff",
+  padding: "10px",
+  borderRadius: "12px",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  textAlign: "center",
+  fontWeight: "600",
+  height: "120px", // ✅ sab ka height equal
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "25px",
+};
+
 
   const statCard = {
     background: "linear-gradient(90deg, #0996e6, #29c2ee)",
