@@ -35,7 +35,7 @@ function App() {
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
-              }
+              } 
             />
 
             {/* Admin Only */}
