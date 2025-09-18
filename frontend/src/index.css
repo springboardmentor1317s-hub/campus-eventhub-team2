@@ -5,11 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-<<<<<<< HEAD
-  background-color: #242424;
-=======
   background-color: #110f0f;
->>>>>>> 691d12a1436471119c9ea769cc0bcdf3163c5867
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,13 +17,8 @@ html, body, #root {
   padding: 0;
   width: 100%;
   height: 100%;
-<<<<<<< HEAD
-  overflow-x: hidden;  /* prevent horizontal scroll */
-  background: #fff;    /* remove default black bg */
-=======
   overflow-x: hidden; 
   background: #f4f3f3;    /* remove default black bg */
->>>>>>> 691d12a1436471119c9ea769cc0bcdf3163c5867
 }
 a {
   font-weight: 500;
@@ -58,11 +49,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-<<<<<<< HEAD
-  background-color: #1a1a1a;
-=======
   background-color: #100f0f;
->>>>>>> 691d12a1436471119c9ea769cc0bcdf3163c5867
   cursor: pointer;
   transition: border-color 0.25s;
 }
