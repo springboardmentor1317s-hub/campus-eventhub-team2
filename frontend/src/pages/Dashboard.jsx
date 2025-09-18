@@ -90,6 +90,7 @@ export default function Dashboard() {
     flexDirection: "column",
   };
 
+<<<<<<< HEAD
 const statsGrid = {
   background: "#fff",
   padding: "10px",
@@ -104,6 +105,14 @@ const statsGrid = {
   gap: "25px",
 };
 
+=======
+  const statsGrid = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "1.7rem",
+    marginTop: "2.2rem",
+  };
+>>>>>>> 691d12a1436471119c9ea769cc0bcdf3163c5867
 
   const statCard = {
     background: "linear-gradient(90deg, #0996e6, #29c2ee)",
@@ -176,6 +185,7 @@ const statsGrid = {
         <h2>Welcome, {user.name}!</h2>
 
         {/* Admin Dashboard */}
+<<<<<<< HEAD
 {user.role === "college_admin" && (
   <>
     <div style={statsGrid}>
@@ -301,6 +311,113 @@ const statsGrid = {
   </>
 )}
 
+=======
+        {user.role === "college_admin" && (
+          <>
+            <div style={statsGrid}>
+              <div style={statCard}>📈 View Analytics</div>
+              <div style={statCard}>📅 Total Events: {stats.totalEvents}</div>
+              <div style={statCard}>👥 Active Users: {stats.activeUsers}</div>
+              <div style={statCard}>📝 Total Registrations: {stats.totalRegistrations}</div>
+              <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
+            </div>
+
+            <div style={{ marginTop: "2rem" }}>
+              <h3>📅 All Events</h3>
+
+              {/* ✅ Styled Sorting + Filtering */}
+              <div
+                style={{
+                  marginBottom: "1rem",
+                  fontSize: "1.1rem",
+                  fontWeight: "500",
+                  color: "#0996e6",
+                }}
+              >
+                <label style={{ marginRight: "12px" }}>Sort by:</label>
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  style={selectStyle}
+                  onMouseEnter={(e) =>
+                    (e.target.style.border = "1px solid #007acc")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.target.style.border = "1px solid #0996e6")
+                  }
+                >
+                  <option value="date">Start Date</option>
+                  <option value="category">Category (A-Z)</option>
+                </select>
+
+                <label style={{ margin: "0 12px" }}>Filter by:</label>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  style={selectStyle}
+                  onMouseEnter={(e) =>
+                    (e.target.style.border = "1px solid #007acc")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.target.style.border = "1px solid #0996e6")
+                  }
+                >
+                  <option value="all">All</option>
+                  <option value="sports">Sports</option>
+                  <option value="hackathon">Hackathon</option>
+                  <option value="cultural">Cultural</option>
+                  <option value="workshop">Workshop</option>
+                </select>
+              </div>
+
+              {sortedEvents.length === 0 ? (
+                <p>No events found.</p>
+              ) : (
+                <ul style={{ marginTop: "1rem", paddingLeft: 0, listStyle: "none" }}>
+                  {sortedEvents.map((event) => (
+                    <li key={event._id} style={{ ...eventCard, marginBottom: "20px" }}>
+                      <strong style={{ fontSize: "1.25rem", color: "#14476f" }}>
+                        {event.title}
+                      </strong>{" "}
+                      <span
+                        style={{
+                          background: "#e4f1fb",
+                          color: "#2384cb",
+                          marginLeft: "10px",
+                          padding: "3px 12px",
+                          borderRadius: "18px",
+                          fontSize: "0.98rem",
+                        }}
+                      >
+                        {event.category}
+                      </span>
+                      <div
+                        style={{
+                          margin: "10px 0 14px 0",
+                          color: "#666",
+                          fontSize: "1.04rem",
+                        }}
+                      >
+                        📍 {event.location || "N/A"}
+                      </div>
+                      <div
+                        style={{
+                          color: "#888",
+                          fontSize: "0.97rem",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        {new Date(event.startDate).toLocaleDateString()} -{" "}
+                        {new Date(event.endDate).toLocaleDateString()}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </>
+        )}
+>>>>>>> 691d12a1436471119c9ea769cc0bcdf3163c5867
 
         {/* Student Dashboard */}
         {user.role === "student" && (
@@ -461,4 +578,8 @@ const statsGrid = {
       </div>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 691d12a1436471119c9ea769cc0bcdf3163c5867

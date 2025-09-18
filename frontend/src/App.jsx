@@ -19,7 +19,11 @@ function App() {
         <div
           style={{
             flex: 1,
+<<<<<<< HEAD
             padding: "2rem",
+=======
+            // padding: "2rem",
+>>>>>>> 691d12a1436471119c9ea769cc0bcdf3163c5867
           }}
         >
           <Routes>
