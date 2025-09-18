@@ -19,7 +19,7 @@ function App() {
         <div
           style={{
             flex: 1,
-            padding: "2rem",
+            // padding: "2rem",
           }}
         >
           <Routes>
