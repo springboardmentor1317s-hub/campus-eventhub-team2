@@ -66,7 +66,7 @@ export default function Dashboard() {
     event.registrations?.includes(user.id)
   );
 
-  // Shared styles
+  // Styles
   const containerOuter = {
     minHeight: "100vh",
     width: "100vw",
@@ -90,20 +90,19 @@ export default function Dashboard() {
     flexDirection: "column",
   };
 
-const statsGrid = {
-  background: "#fff",
-  padding: "10px",
-  borderRadius: "12px",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-  textAlign: "center",
-  fontWeight: "600",
-  height: "120px", // ✅ sab ka height equal
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "25px",
-};
-
+  const statsGrid = {
+    background: "#fff",
+    padding: "10px",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    textAlign: "center",
+    fontWeight: "600",
+    height: "120px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "25px",
+  };
 
   const statCard = {
     background: "linear-gradient(90deg, #0996e6, #29c2ee)",
@@ -156,7 +155,6 @@ const statsGrid = {
     alignSelf: "start",
   };
 
-  // ✅ Shared dropdown styles with hover
   const selectStyle = {
     padding: "8px 12px",
     borderRadius: "6px",
@@ -165,6 +163,22 @@ const statsGrid = {
     color: "#14476f",
     cursor: "pointer",
     transition: "all 0.2s ease",
+  };
+
+  // Image mapping
+  const getEventImage = (category) => {
+    switch (category) {
+      case "Sports":
+        return "/sports.events.jpg";
+      case "Hackathon":
+        return "/hackathon.events.jpg";
+      case "Cultural":
+        return "/cultural.events.jpg";
+      case "Workshop":
+        return "/workshop.events.jpg";
+      default:
+        return "/default.jpg";
+    }
   };
 
   return (
@@ -176,155 +190,78 @@ const statsGrid = {
         <h2>Welcome, {user.name}!</h2>
 
         {/* Admin Dashboard */}
-{user.role === "college_admin" && (
-  <>
-    <div style={statsGrid}>
-      <div style={statCard}>📈 View Analytics</div>
-      <div style={statCard}>📅 Total Events: {stats.totalEvents}</div>
-      <div style={statCard}>👥 Active Users: {stats.activeUsers}</div>
-      <div style={statCard}>📝 Total Registrations: {stats.totalRegistrations}</div>
-      <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
-    </div>
-
-    <div style={{ marginTop: "2rem" }}>
-      <h3>📅 All Events</h3>
-
-      {/* ✅ Styled Sorting + Filtering */}
-      <div
-        style={{
-          marginBottom: "2.5rem",
-          fontSize: "1.1rem",
-          fontWeight: "500",
-          color: "#0996e6",
-        }}
-      >
-        <label style={{ marginRight: "12px" }}>Sort by:</label>
-        <select
-          value={sortOption}
-          onChange={(e) => setSortOption(e.target.value)}
-          style={selectStyle}
-          onMouseEnter={(e) => (e.target.style.border = "1px solid #007acc")}
-          onMouseLeave={(e) => (e.target.style.border = "1px solid #0996e6")}
-        >
-          <option value="date">Start Date</option>
-          <option value="category">Category (A-Z)</option>
-        </select>
-
-        <label style={{ margin: "0 12px" }}>Filter by:</label>
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          style={selectStyle}
-          onMouseEnter={(e) => (e.target.style.border = "1px solid #007acc")}
-          onMouseLeave={(e) => (e.target.style.border = "1px solid #0996e6")}
-        >
-          <option value="all">All</option>
-          <option value="sports">Sports</option>
-          <option value="hackathon">Hackathon</option>
-          <option value="cultural">Cultural</option>
-          <option value="workshop">Workshop</option>
-        </select>
-      </div>
-
-      {sortedEvents.length === 0 ? (
-        <p>No events found.</p>
-      ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            gap: "20px",
-            marginTop: "1rem",
-          }}
-        >
-          {sortedEvents.map((event) => (
-            <div
-              key={event._id}
-              style={{
-                background: "#fff",
-                borderRadius: "16px",
-                padding: "18px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                transition: "all 0.3s ease",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.boxShadow =
-                  "0 6px 16px rgba(0,0,0,0.2)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.boxShadow =
-                  "0 2px 8px rgba(0,0,0,0.1)")
-              }
-            >
-              <strong style={{ fontSize: "1.25rem", color: "#14476f" }}>
-                {event.title}
-              </strong>
-              <span
-                style={{
-                  background: "#e4f1fb",
-                  color: "#2384cb",
-                  marginLeft: "10px",
-                  padding: "3px 12px",
-                  borderRadius: "18px",
-                  fontSize: "0.98rem",
-                }}
-              >
-                {event.category}
-              </span>
-
-              <div
-                style={{
-                  margin: "12px 0 14px 0",
-                  color: "#666",
-                  fontSize: "1.04rem",
-                }}
-              >
-                📍 {event.location || "N/A"}
-              </div>
-
-              <div
-                style={{
-                  color: "#888",
-                  fontSize: "0.97rem",
-                  marginBottom: "8px",
-                }}
-              >
-                {new Date(event.startDate).toLocaleDateString()} -{" "}
-                {new Date(event.endDate).toLocaleDateString()}
-              </div>
+        {user.role === "college_admin" && (
+          <>
+            <div style={statsGrid}>
+              <div style={statCard}>📈 View Analytics</div>
+              <div style={statCard}>📅 Total Events: {stats.totalEvents}</div>
+              <div style={statCard}>👥 Active Users: {stats.activeUsers}</div>
+              <div style={statCard}>📝 Total Registrations: {stats.totalRegistrations}</div>
+              <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  </>
-)}
 
+            <div style={{ marginTop: "2rem" }}>
+              <h3>📅 All Events</h3>
+              <div style={{ marginBottom: "2.5rem", fontSize: "1.1rem", fontWeight: "500", color: "#0996e6" }}>
+                <label style={{ marginRight: "12px" }}>Sort by:</label>
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  style={selectStyle}
+                >
+                  <option value="date">Start Date</option>
+                  <option value="category">Category (A-Z)</option>
+                </select>
+
+                <label style={{ margin: "0 12px" }}>Filter by:</label>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  style={selectStyle}
+                >
+                  <option value="all">All</option>
+                  <option value="sports">Sports</option>
+                  <option value="hackathon">Hackathon</option>
+                  <option value="cultural">Cultural</option>
+                  <option value="workshop">Workshop</option>
+                </select>
+              </div>
+
+              {sortedEvents.length === 0 ? (
+                <p>No events found.</p>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px", marginTop: "1rem" }}>
+                  {sortedEvents.map((event) => (
+                    <div key={event._id} style={{ background: "#fff", borderRadius: "16px", padding: "18px", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", transition: "all 0.3s ease", cursor: "pointer" }}>
+                      <strong style={{ fontSize: "1.25rem", color: "#14476f" }}>{event.title}</strong>
+                      <span style={{ background: "#e4f1fb", color: "#2384cb", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.98rem" }}>
+                        {event.category}
+                      </span>
+
+                      <div style={{ margin: "12px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>
+                        📍 {event.location || "N/A"}
+                      </div>
+
+                      <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
+                        {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Student Dashboard */}
         {user.role === "student" && (
           <>
-            {/* ✅ Styled Sorting + Filtering */}
-            <div
-              style={{
-                marginBottom: "1rem",
-                fontSize: "1.1rem",
-                fontWeight: "500",
-                color: "#0996e6",
-              }}
-            >
+            <div style={{ marginBottom: "1rem", fontSize: "1.1rem", fontWeight: "500", color: "#0996e6" }}>
               <label style={{ marginRight: "12px" }}>Sort by:</label>
               <select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
                 style={selectStyle}
-                onMouseEnter={(e) =>
-                  (e.target.style.border = "1px solid #007acc")
-                }
-                onMouseLeave={(e) =>
-                  (e.target.style.border = "1px solid #0996e6")
-                }
               >
                 <option value="date">Start Date</option>
                 <option value="category">Category (A-Z)</option>
@@ -335,12 +272,6 @@ const statsGrid = {
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
                 style={selectStyle}
-                onMouseEnter={(e) =>
-                  (e.target.style.border = "1px solid #007acc")
-                }
-                onMouseLeave={(e) =>
-                  (e.target.style.border = "1px solid #0996e6")
-                }
               >
                 <option value="all">All</option>
                 <option value="sports">Sports</option>
@@ -350,52 +281,27 @@ const statsGrid = {
               </select>
             </div>
 
-            {/* Upcoming Events Cards */}
             <section>
-              <h3 style={{ fontSize: "1.35rem", color: "#12649a", marginBottom: "20px" }}>
-                Upcoming Events
-              </h3>
+              <h3 style={{ fontSize: "1.35rem", color: "#12649a", marginBottom: "20px" }}>Upcoming Events</h3>
               {sortedEvents.length === 0 ? (
                 <p>No upcoming events.</p>
               ) : (
                 <div style={eventCardGrid}>
                   {sortedEvents.map((event) => (
                     <div key={event._id} style={eventCard}>
-                      <div>
-                        <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>
-                          {event.title}
-                        </strong>
-                        <span
-                          style={{
-                            background: "#e4f1fb",
-                            color: "#2384cb",
-                            marginLeft: "10px",
-                            padding: "3px 12px",
-                            borderRadius: "18px",
-                            fontSize: "0.98rem",
-                          }}
-                        >
-                          {event.category}
-                        </span>
+                      <div style={{ marginBottom: "12px" }}>
+                        <img
+                          src={getEventImage(event.category)}
+                          alt={event.category}
+                          style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "10px" }}
+                          onError={(e) => { e.target.src = "/default.jpg"; }}
+                        />
                       </div>
-                      <div
-                        style={{
-                          margin: "10px 0 14px 0",
-                          color: "#666",
-                          fontSize: "1.04rem",
-                        }}
-                      >
-                        📍 {event.location || "N/A"}
-                      </div>
-                      <div
-                        style={{
-                          color: "#888",
-                          fontSize: "0.97rem",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        {new Date(event.startDate).toLocaleDateString()} -{" "}
-                        {new Date(event.endDate).toLocaleDateString()}
+                      <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>{event.title}</strong>
+                      <span style={{ background: "#e4f1fb", color: "#2384cb", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.98rem" }}>{event.category}</span>
+                      <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>📍 {event.location || "N/A"}</div>
+                      <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
+                        {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
                       </div>
                       <button style={registerBtn}>Register</button>
                     </div>
@@ -404,44 +310,27 @@ const statsGrid = {
               )}
             </section>
 
-            {/* Registered Events Cards */}
             <section style={{ marginTop: "3.3rem" }}>
-              <h3 style={{ fontSize: "1.19rem", color: "#1b7e59", marginBottom: "18px" }}>
-                Your Registered Events
-              </h3>
+              <h3 style={{ fontSize: "1.19rem", color: "#1b7e59", marginBottom: "18px" }}>Your Registered Events</h3>
               {registeredEvents.length === 0 ? (
                 <p>You haven’t registered for any events yet.</p>
               ) : (
                 <div style={eventCardGrid}>
                   {registeredEvents.map((event) => (
                     <div key={event._id} style={eventCardRegistered}>
-                      <strong style={{ fontSize: "1.18rem", color: "#137d52" }}>
-                        {event.title}
-                      </strong>
-                      <span
-                        style={{
-                          background: "#e9fff0",
-                          color: "#1b7e59",
-                          marginLeft: "10px",
-                          padding: "3px 12px",
-                          borderRadius: "18px",
-                          fontSize: "0.96rem",
-                        }}
-                      >
-                        {event.category}
-                      </span>
-                      <div
-                        style={{
-                          margin: "10px 0 10px 0",
-                          color: "#16623c",
-                          fontSize: "1.03rem",
-                        }}
-                      >
-                        📍 {event.location || "N/A"}
+                      <div style={{ marginBottom: "12px" }}>
+                        <img
+                          src={getEventImage(event.category)}
+                          alt={event.category}
+                          style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "10px" }}
+                          onError={(e) => { e.target.src = "/default.jpg"; }}
+                        />
                       </div>
+                      <strong style={{ fontSize: "1.18rem", color: "#137d52" }}>{event.title}</strong>
+                      <span style={{ background: "#e9fff0", color: "#1b7e59", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.96rem" }}>{event.category}</span>
+                      <div style={{ margin: "10px 0 10px 0", color: "#16623c", fontSize: "1.03rem" }}>📍 {event.location || "N/A"}</div>
                       <div style={{ color: "#488a60", fontSize: "0.97rem" }}>
-                        {new Date(event.startDate).toLocaleDateString()} -{" "}
-                        {new Date(event.endDate).toLocaleDateString()}
+                        {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
                       </div>
                     </div>
                   ))}
@@ -449,12 +338,9 @@ const statsGrid = {
               )}
             </section>
 
-            {/* Live Poll */}
             <section style={{ marginTop: "2.8rem" }}>
               <h3 style={{ fontSize: "1.08rem", color: "#0075C4" }}>Live Poll</h3>
-              <p style={{ color: "#444", fontSize: "1rem" }}>
-                Vote and see results during events. (Feature coming soon 🚀)
-              </p>
+              <p style={{ color: "#444", fontSize: "1rem" }}>Vote and see results during events. (Feature coming soon 🚀)</p>
             </section>
           </>
         )}

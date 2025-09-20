@@ -18,14 +18,28 @@ export default function CreateEvent() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.post("/api/events", form, {
+
+      // ✅ Auto map category -> image
+      const imageMap = {
+        Sports: "sports.events.jpg",
+        Hackathon: "hackathon.events.jpg",
+        Cultural: "cultural.events.jpg",
+        Workshop: "workshop.events.jpg",
+      };
+
+      const eventData = {
+        ...form,
+        image: imageMap[form.category] || "default.jpg", // fallback
+      };
+
+      await axios.post("/api/events", eventData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       alert("✅ Event created successfully!");
       navigate("/dashboard");
     } catch (err) {
-      console.error("Event creation error:", err.response || err); // log full error
+      console.error("Event creation error:", err.response || err);
       alert(err.response?.data?.error || "❌ Failed to create event");
     }
   };
