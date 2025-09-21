@@ -92,39 +92,41 @@ export default function CreateEvent() {
             style={inputStyle}
           />
 
-          <textarea
+          {/* <textarea
             placeholder="Event Description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             rows="3"
             style={inputStyle}
-          />
+          /> */}
 
           <input
             type="text"
-            placeholder="Location"
+            placeholder="About the Event Mini 20 words"
             value={form.location}
             onChange={(e) => setForm({ ...form, location: e.target.value })}
             style={inputStyle}
           />
 
-          <label style={labelStyle}>Start Date</label>
+          <label style={labelStyle}>Start Date & Time</label>
           <input
-            type="date"
+            type="datetime-local"
             value={form.startDate}
             onChange={(e) => setForm({ ...form, startDate: e.target.value })}
             required
             style={inputStyle}
           />
 
-          <label style={labelStyle}>End Date</label>
+
+          <label style={labelStyle}>End Date & Time</label>
           <input
-            type="date"
+            type="datetime-local"
             value={form.endDate}
             onChange={(e) => setForm({ ...form, endDate: e.target.value })}
             required
             style={inputStyle}
           />
+
 
           <div style={{ marginTop: "10px", marginBottom: "10px", textAlign: "left" }}>
             <label style={labelStyle}>College</label>
