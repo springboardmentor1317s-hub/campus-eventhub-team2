@@ -300,6 +300,8 @@ export default function Dashboard() {
                       <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>{event.title}</strong>
                       <span style={{ background: "#e4f1fb", color: "#2384cb", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.98rem" }}>{event.category}</span>
                       <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>📍 {event.location || "N/A"}</div>
+                      <div style={{ marginBottom: "10px", color: "#444", fontSize: "1rem" }}>🏫 {event.college || "N/A"} </div>
+                      
                       <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
                         {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
                       </div>

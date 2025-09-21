@@ -7,6 +7,12 @@ const eventSchema = new mongoose.Schema(
       ref: "User",
       required: true, // which admin created it
     },
+    college: {
+  type: String,
+  required: true,
+  trim: true,
+},
+
     title: {
       type: String,
       required: true,
@@ -33,6 +39,8 @@ const eventSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    
+
     onlineLink: {
       type: String, // for hybrid/online events
       trim: true,

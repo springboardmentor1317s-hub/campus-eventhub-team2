@@ -1,6 +1,16 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
+
+
+const collegeOptions = [
+  { value: "IIT Bombay", label: "IIT Bombay" },
+  { value: "IIT Delhi", label: "IIT Delhi" },
+  { value: "NIT Trichy", label: "NIT Trichy" },
+  { value: "BITS Pilani", label: "BITS Pilani" },
+  { value: "Anna University", label: "Anna University" },
+];
 
 export default function CreateEvent() {
   const [form, setForm] = useState({
@@ -10,6 +20,7 @@ export default function CreateEvent() {
     location: "",
     startDate: "",
     endDate: "",
+    college: "",
   });
 
   const navigate = useNavigate();
@@ -30,6 +41,7 @@ export default function CreateEvent() {
       const eventData = {
         ...form,
         image: imageMap[form.category] || "default.jpg", // fallback
+        college: form.college,
       };
 
       await axios.post("/api/events", eventData, {
@@ -113,6 +125,36 @@ export default function CreateEvent() {
             required
             style={inputStyle}
           />
+
+          <div style={{ marginTop: "10px", marginBottom: "10px", textAlign: "left" }}>
+            <label style={labelStyle}>College</label>
+            <Select
+              options={collegeOptions}
+              placeholder="Select your college"
+              value={
+                form.college
+                  ? collegeOptions.find((opt) => opt.value === form.college)
+                  : null
+              }
+              onChange={(selected) =>
+                setForm({ ...form, college: selected?.value || "" })
+              }
+              isSearchable
+              menuPortalTarget={document.body}
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  fontSize: "1rem",
+                  padding: "2px",
+                  marginBottom: "10px",
+                }),
+                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+              }}
+            />
+          </div>
+
 
           <select
             value={form.category}

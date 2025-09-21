@@ -35,7 +35,7 @@ function adminMiddleware(req, res, next) {
 // =============================
 router.post("/", authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const { title, description, category, location, startDate, endDate, onlineLink } = req.body;
+    const { title, description, category, location, startDate, endDate, college, onlineLink } = req.body;
 
     if (!title || !startDate || !endDate) {
       return res.status(400).json({ error: "Title, startDate, and endDate are required" });
@@ -49,6 +49,7 @@ router.post("/", authMiddleware, adminMiddleware, async (req, res) => {
       location,
       startDate,
       endDate,
+      college,
       onlineLink,
     });
 
