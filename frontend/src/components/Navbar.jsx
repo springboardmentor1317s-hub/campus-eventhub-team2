@@ -16,13 +16,13 @@ function Navbar() {
       {/* ✅ Left: Logo */}
       <div style={logoContainer}>
         <img
-          src="/logo.png" // ✅ place logo.png in /public
+          src="/Event3.png" // ✅ place event.png in /public
           alt="Logo"
-          style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+          style={{ width: "135px", height: "60px", }}
         />
-        <span style={{ marginLeft: "10px", fontSize: "1.3rem", fontWeight: "bold", color: "white" }}>
+        {/* <span style={{ marginLeft: "10px", fontSize: "1.3rem", fontWeight: "bold", color: "white" }}>
           Event Hub
-        </span>
+        </span> */}
       </div>
 
       {/* ✅ Right: Navigation Links */}
