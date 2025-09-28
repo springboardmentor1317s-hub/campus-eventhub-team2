@@ -1,39 +1,30 @@
 import express from "express";
-import jwt from "jsonwebtoken";
+import Registration from "../models/Registration.js";
 import Event from "../models/Event.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { roleMiddleware } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-// =============================
-// 🔑 Middleware: Verify token
-// =============================
-function authMiddleware(req, res, next) {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Access denied" });
-
+// =========================================================
+// 📌 Get events registered by the current user
+// =========================================================
+router.get("/my-registered", authMiddleware, async (req, res) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { id, role }
-    next();
-  } catch (err) {
-    res.status(401).json({ error: "Invalid token" });
-  }
-}
+    const registrations = await Registration.find({ student: req.user.id });
+    const eventIds = registrations.map(reg => reg.event);
+    const registeredEvents = await Event.find({ _id: { $in: eventIds } });
 
-// =============================
-// 🔑 Middleware: Only Admins
-// =============================
-function adminMiddleware(req, res, next) {
-  if (req.user.role !== "college_admin") {
-    return res.status(403).json({ error: "Only college admins can create events" });
+    res.status(200).json(registeredEvents);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch your registered events" });
   }
-  next();
-}
+});
 
 // =============================
 // 📌 Create Event (Admin Only)
 // =============================
-router.post("/", authMiddleware, adminMiddleware, async (req, res) => {
+router.post("/", authMiddleware, roleMiddleware(["college_admin"]), async (req, res) => {
   try {
     const { title, description, category, location, startDate, endDate, college, onlineLink } = req.body;
 
@@ -66,8 +57,8 @@ router.post("/", authMiddleware, adminMiddleware, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const events = await Event.find({
-      startDate: { $gte: new Date() }, // ✅ only future events
-    }).sort({ startDate: 1 }); // earliest first
+      startDate: { $gte: new Date() },
+    }).sort({ startDate: 1 });
 
     res.json(events);
   } catch (err) {

@@ -47,11 +47,20 @@ function Navbar() {
             <Link to="/dashboard" style={linkStyle} className="nav-link">
               Dashboard
             </Link>
+
             {role === "college_admin" && (
               <Link to="/create-event" style={linkStyle} className="nav-link">
                 Create Event
               </Link>
             )}
+
+            {role === "college_admin" && (
+  <Link to="/create-event" style={linkStyle} className="nav-link">
+    Registrations
+  </Link>
+)}
+
+
 
             {/* User Info */}
             <div style={{ textAlign: "right", color: "white", fontSize: "1rem" }}>
