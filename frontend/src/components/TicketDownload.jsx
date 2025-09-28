@@ -57,7 +57,7 @@ export default function TicketDownload({ event, user }) {
         doc.setFont("helvetica", "bold");
         doc.setTextColor(34, 197, 94);
         doc.text("VENUE", 25, 40);
-        
+
         doc.setFontSize(12);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(60, 60, 60);
@@ -74,8 +74,8 @@ export default function TicketDownload({ event, user }) {
         // Format dates beautifully
         const formatDate = (dateStr) => {
             const d = new Date(dateStr);
-            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 
-                           'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+                'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
             const month = months[d.getMonth()];
             const day = String(d.getDate()).padStart(2, '0');
             const year = d.getFullYear();
@@ -101,7 +101,7 @@ export default function TicketDownload({ event, user }) {
             startDate: event.startDate,
             ticketId: `TKT-${Math.random().toString(36).substr(2, 8).toUpperCase()}`
         });
-        
+
         const qrImage = await QRCode.toDataURL(qrData, {
             width: 100,
             margin: 1,
@@ -138,7 +138,7 @@ export default function TicketDownload({ event, user }) {
         doc.setFont("helvetica", "bold");
         doc.setTextColor(100, 100, 100);
         doc.text("ATTENDEE", 145, 70);
-        
+
         doc.setFontSize(9);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(40, 40, 40);
