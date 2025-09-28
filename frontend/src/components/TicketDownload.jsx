@@ -175,7 +175,31 @@ export default function TicketDownload({ event, user }) {
     return (
         <button
             onClick={generateTicket}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl mt-3 hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 flex items-center gap-2 font-medium shadow-lg"
+            style={{
+                padding: '12px 24px',
+                background: 'linear-gradient(45deg, #3B82F6, #8B5CF6)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                marginTop: '12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontWeight: '500',
+                fontSize: '14px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                transition: 'all 0.2s ease',
+                transform: 'scale(1)'
+            }}
+            onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(45deg, #2563EB, #7C3AED)';
+                e.target.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(45deg, #3B82F6, #8B5CF6)';
+                e.target.style.transform = 'scale(1)';
+            }}
         >
             🎟️ Download Entry Ticket
         </button>
