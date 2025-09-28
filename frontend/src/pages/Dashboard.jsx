@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import TicketDownload from "../components/TicketDownload";
+
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [events, setEvents] = useState([]);
   const [registeredEvents, setRegisteredEvents] = useState([]);
-  const [justRegisteredId, setJustRegisteredId] = useState(null); // ✅ 1. ADD NEW STATE for the temporary badge
+  const [justRegisteredId, setJustRegisteredId] = useState(null);
   const [sortOption, setSortOption] = useState("date");
   const [filterCategory, setFilterCategory] = useState("all");
   const [stats, setStats] = useState({
@@ -21,6 +23,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const name = localStorage.getItem("name");
+    const email = localStorage.getItem("email"); // ⬅️ Email bhi lo
     const role = localStorage.getItem("role");
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
@@ -28,22 +31,20 @@ export default function Dashboard() {
     if (!name || !role || !token) {
       navigate("/login");
     } else {
-      setUser({ name, role, id: userId, token });
+      setUser({ name, email, role, id: userId, token }); // ⬅️ User me email bhi add karo
     }
 
     axios
       .get(`${API}/events`)
       .then((res) => setEvents(res.data))
       .catch((err) => console.error("Failed to load events", err));
-      
+
     if (role === "student" && token) {
       axios
         .get(`${API}/events/my-registered`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        .then((res) => {
-          setRegisteredEvents(res.data);
-        })
+        .then((res) => setRegisteredEvents(res.data))
         .catch((err) => console.error("Failed to load registered events", err));
     }
 
@@ -71,13 +72,12 @@ export default function Dashboard() {
     if (sortOption === "category") return a.category.localeCompare(b.category);
     return 0;
   });
-  
+
   const displayEvents = sortedEvents;
 
   const handleRegister = async (eventId) => {
     try {
       const token = localStorage.getItem("token");
-
       const res = await fetch(`${API}/registrations`, {
         method: "POST",
         headers: {
@@ -94,11 +94,8 @@ export default function Dashboard() {
         if (newRegisteredEvent) {
           setRegisteredEvents(prev => [...prev, newRegisteredEvent]);
         }
-        
-        // ✅ 2. UPDATE handleRegister TO TRIGGER THE BADGE
         setJustRegisteredId(eventId);
-        setTimeout(() => setJustRegisteredId(null), 2000); // Badge disappears after 2 seconds
-
+        setTimeout(() => setJustRegisteredId(null), 2000);
       } else {
         alert(data.message || "Error registering");
       }
@@ -107,7 +104,6 @@ export default function Dashboard() {
     }
   };
 
-  // Styling objects
   const containerOuter = { minHeight: "100vh", width: "100vw", background: "linear-gradient(120deg, #eaf6ff 60%, #d4edfb 100%)", margin: 0, padding: 0, display: "flex", justifyContent: "center" };
   const containerInner = { width: "100%", maxWidth: "1600px", margin: "0 auto", background: "#fff", borderRadius: "16px", boxShadow: "0 10px 30px rgba(33,77,109,0.07)", minHeight: "88vh", padding: "40px 36px", display: "flex", flexDirection: "column" };
   const statsGrid = { background: "#fff", padding: "10px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", textAlign: "center", fontWeight: "600", height: "120px", display: "flex", alignItems: "center", justifyContent: "center", gap: "25px" };
@@ -135,7 +131,7 @@ export default function Dashboard() {
         <h1>📊 {user.role === "college_admin" ? "Admin Dashboard" : "Student Dashboard"}</h1>
         <h2>Welcome, {user.name}!</h2>
 
-        {/* Admin Dashboard */}
+        {/* ADMIN PANEL */}
         {user.role === "college_admin" && (
           <>
             <div style={statsGrid}>
@@ -151,14 +147,14 @@ export default function Dashboard() {
                 <div style={eventCardGrid}>
                   {sortedEvents.map((event) => (
                     <div key={event._id} style={eventCard}>
-                       <div style={{ marginBottom: "12px" }}>
-                         <img src={getEventImage(event.category)} alt={event.category} style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "10px" }} onError={(e) => { e.target.src = "/default.jpg"; }} />
-                       </div>
-                       <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>{event.title}</strong>
-                       <span style={{ background: "#e4f1fb", color: "#2384cb", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.98rem" }}>{event.category}</span>
-                       <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>📍 {event.location || "N/A"}</div>
-                       <div style={{ marginBottom: "10px", color: "#444", fontSize: "1rem" }}>🏫 {event.college || "N/A"}</div>
-                       <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>{new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</div>
+                      <div style={{ marginBottom: "12px" }}>
+                        <img src={getEventImage(event.category)} alt={event.category} style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "10px" }} onError={(e) => { e.target.src = "/default.jpg"; }} />
+                      </div>
+                      <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>{event.title}</strong>
+                      <span style={{ background: "#e4f1fb", color: "#2384cb", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.98rem" }}>{event.category}</span>
+                      <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>📍 {event.location || "N/A"}</div>
+                      <div style={{ marginBottom: "10px", color: "#444", fontSize: "1rem" }}>🏫 {event.college || "N/A"}</div>
+                      <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>{new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</div>
                     </div>
                   ))}
                 </div>
@@ -167,7 +163,7 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* Student Dashboard */}
+        {/* STUDENT DASHBOARD */}
         {user.role === "student" && (
           <>
             <div style={{ marginBottom: "1rem", fontSize: "1.1rem", fontWeight: "500", color: "#0996e6" }}>
@@ -194,8 +190,6 @@ export default function Dashboard() {
                     const isRegistered = registeredEvents.some(regEvent => regEvent._id === event._id);
                     return (
                       <div key={event._id} style={isRegistered ? eventCardRegistered : eventCard}>
-                        
-                        {/* ✅ 3. REPLACE the old badge logic with this new temporary one */}
                         {justRegisteredId === event._id && (
                           <div style={{
                             position: "absolute",
@@ -243,6 +237,7 @@ export default function Dashboard() {
                       <span style={{ background: "#e9fff0", color: "#1b7e59", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.96rem" }}>{event.category}</span>
                       <div style={{ margin: "10px 0 10px 0", color: "#16623c", fontSize: "1.03rem" }}>📍 {event.location || "N/A"}</div>
                       <div style={{ color: "#488a60", fontSize: "0.97rem" }}>{new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}</div>
+                      <TicketDownload event={event} user={user} /> {/* ⬅️ Download Ticket Button */}
                     </div>
                   ))}
                 </div>
