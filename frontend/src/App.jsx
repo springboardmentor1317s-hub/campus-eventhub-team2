@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreateEvent from "./pages/CreateEvent";
 import EventList from "./pages/EventList";
+import Registrations from "./pages/Registrations"; // ✅ Import new Registrations component
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar"; // ✅ Imported Navbar
 
@@ -44,6 +45,16 @@ function App() {
               element={
                 <ProtectedRoute role="college_admin">
                   <CreateEvent />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* ✅ NEW: Admin Registrations Management */}
+            <Route
+              path="/registrations"
+              element={
+                <ProtectedRoute role="college_admin">
+                  <Registrations />
                 </ProtectedRoute>
               }
             />

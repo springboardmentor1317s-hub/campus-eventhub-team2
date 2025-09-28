@@ -9,6 +9,7 @@ import eventRoutes from "./routes/eventRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import registrationRoutes from "./routes/registrationRoutes.js";
+import adminRoutes from "./routes/admin.js";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use("/api/events", eventRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/registrations", registrationRoutes); // ✅ correctly routed
+app.use("/api/admin", adminRoutes);
 
 // ✅ Health check
 app.get("/", (req, res) => {

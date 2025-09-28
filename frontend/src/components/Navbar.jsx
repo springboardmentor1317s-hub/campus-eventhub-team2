@@ -54,13 +54,12 @@ function Navbar() {
               </Link>
             )}
 
+            {/* Fixed: Registrations link now points to /registrations */}
             {role === "college_admin" && (
-  <Link to="/create-event" style={linkStyle} className="nav-link">
-    Registrations
-  </Link>
-)}
-
-
+              <Link to="/registrations" style={linkStyle} className="nav-link">
+                Registrations
+              </Link>
+            )}
 
             {/* User Info */}
             <div style={{ textAlign: "right", color: "white", fontSize: "1rem" }}>
