@@ -1,35 +1,49 @@
 import express from "express";
-import Event from "../models/Event.js";
-import User from "../models/User.js";
+import Registration from "../models/Registration.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// ✅ Admin stats endpoint
-router.get("/stats", async (req, res) => {
+// GET all registrations for admin
+router.get("/registrations", authMiddleware, async (req, res) => {
+  if (req.user.role !== "college_admin") {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
   try {
-    const totalEvents = await Event.countDocuments();
-    const totalRegistrationsAgg = await Event.aggregate([
-      { $project: { count: { $size: "$registrations" } } },
-      { $group: { _id: null, total: { $sum: "$count" } } },
-    ]);
-    const totalRegistrations =
-      totalRegistrationsAgg.length > 0 ? totalRegistrationsAgg[0].total : 0;
+    const registrations = await Registration.find()
+      .populate("student", "name email")
+      .populate("event", "title category startDate endDate");
 
-    const activeUsers = await User.countDocuments({
-      lastLogin: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, // last 7 days
-    });
-
-    // If you don't have reviews yet, set static for now
-    const pendingReviews = 12;
-
-    res.json({
-      totalEvents,
-      totalRegistrations,
-      activeUsers,
-      pendingReviews,
-    });
+    res.json(registrations);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// PUT update registration status (approve/reject)
+router.put("/registrations/:id", authMiddleware, async (req, res) => {
+  if (req.user.role !== "college_admin") {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  const { status } = req.body; // "approved" or "rejected"
+  if (!["approved", "rejected"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  try {
+    const registration = await Registration.findById(req.params.id);
+    if (!registration) return res.status(404).json({ message: "Registration not found" });
+
+    registration.status = status;
+    await registration.save();
+
+    res.json({ message: `Registration ${status}` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

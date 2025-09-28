@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -15,26 +15,32 @@ export default function Dashboard() {
   });
 
   const navigate = useNavigate();
+  const API = "http://localhost:5000/api";
 
   useEffect(() => {
     const name = localStorage.getItem("name");
     const role = localStorage.getItem("role");
     const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
 
-    if (!name || !role) {
+    if (!name || !role || !token) {
       navigate("/login");
     } else {
-      setUser({ name, role, id: userId });
+      setUser({ name, role, id: userId, token });
     }
 
+    // Load events
     axios
-      .get("/api/events")
+      .get(`${API}/events`)
       .then((res) => setEvents(res.data))
       .catch((err) => console.error("Failed to load events", err));
 
+    // Load stats if admin
     if (role === "college_admin") {
       axios
-        .get("/api/admin/stats")
+        .get(`${API}/admin/stats`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then((res) => setStats(res.data))
         .catch((err) => console.error("Failed to load stats", err));
     }
@@ -52,21 +58,52 @@ export default function Dashboard() {
 
   // Sorting
   const sortedEvents = [...filteredEvents].sort((a, b) => {
-    if (sortOption === "date") {
-      return new Date(a.startDate) - new Date(b.startDate);
-    }
-    if (sortOption === "category") {
-      return a.category.localeCompare(b.category);
-    }
+    if (sortOption === "date") return new Date(a.startDate) - new Date(b.startDate);
+    if (sortOption === "category") return a.category.localeCompare(b.category);
     return 0;
   });
 
-  // Registered Events
+  // Registered Events for student
   const registeredEvents = events.filter((event) =>
     event.registrations?.includes(user.id)
   );
 
-  // Styles
+  // Student sees all events in upcoming section
+  const displayEvents = sortedEvents;
+
+  // Handle registration
+  const handleRegister = async (eventId) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API}/registrations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ eventId }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("✅ Registered successfully!");
+        setEvents((prev) =>
+          prev.map((event) =>
+            event._id === eventId
+              ? { ...event, registrations: [...(event.registrations || []), user.id] }
+              : event
+          )
+        );
+      } else {
+        alert(data.message || "Error registering");
+      }
+    } catch (err) {
+      alert("❌ Network error while registering");
+    }
+  };
+
+  // Styling objects
   const containerOuter = {
     minHeight: "100vh",
     width: "100vw",
@@ -155,6 +192,12 @@ export default function Dashboard() {
     alignSelf: "start",
   };
 
+  const registeredBtn = {
+    ...registerBtn,
+    background: "gray",
+    cursor: "not-allowed",
+  };
+
   const selectStyle = {
     padding: "8px 12px",
     borderRadius: "6px",
@@ -165,7 +208,6 @@ export default function Dashboard() {
     transition: "all 0.2s ease",
   };
 
-  // Image mapping
   const getEventImage = (category) => {
     switch (category) {
       case "Sports":
@@ -200,89 +242,10 @@ export default function Dashboard() {
               <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
             </div>
 
-            <div style={{ marginTop: "2rem" }}>
-              <h3>📅 All Events</h3>
-              <div style={{ marginBottom: "2.5rem", fontSize: "1.1rem", fontWeight: "500", color: "#0996e6" }}>
-                <label style={{ marginRight: "12px" }}>Sort by:</label>
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
-                  style={selectStyle}
-                >
-                  <option value="date">Start Date</option>
-                  <option value="category">Category (A-Z)</option>
-                </select>
-
-                <label style={{ margin: "0 12px" }}>Filter by:</label>
-                <select
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  style={selectStyle}
-                >
-                  <option value="all">All</option>
-                  <option value="sports">Sports</option>
-                  <option value="hackathon">Hackathon</option>
-                  <option value="cultural">Cultural</option>
-                  <option value="workshop">Workshop</option>
-                </select>
-              </div>
-
-              {sortedEvents.length === 0 ? (
-                <p>No events found.</p>
-              ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px", marginTop: "1rem" }}>
-                  {sortedEvents.map((event) => (
-                    <div key={event._id} style={{ background: "#fff", borderRadius: "16px", padding: "18px", boxShadow: "0 2px 8px rgba(0,0,0,0.1)", transition: "all 0.3s ease", cursor: "pointer" }}>
-                      <strong style={{ fontSize: "1.25rem", color: "#14476f" }}>{event.title}</strong>
-                      <span style={{ background: "#e4f1fb", color: "#2384cb", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.98rem" }}>
-                        {event.category}
-                      </span>
-
-                      <div style={{ margin: "12px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>
-                        📍 {event.location || "N/A"}
-                      </div>
-
-                      <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
-                        {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Student Dashboard */}
-        {user.role === "student" && (
-          <>
-            <div style={{ marginBottom: "1rem", fontSize: "1.1rem", fontWeight: "500", color: "#0996e6" }}>
-              <label style={{ marginRight: "12px" }}>Sort by:</label>
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                style={selectStyle}
-              >
-                <option value="date">Start Date</option>
-                <option value="category">Category (A-Z)</option>
-              </select>
-
-              <label style={{ margin: "0 12px" }}>Filter by:</label>
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                style={selectStyle}
-              >
-                <option value="all">All</option>
-                <option value="sports">Sports</option>
-                <option value="hackathon">Hackathon</option>
-                <option value="cultural">Cultural</option>
-                <option value="workshop">Workshop</option>
-              </select>
-            </div>
-
-            <section>
-              <h3 style={{ fontSize: "1.35rem", color: "#12649a", marginBottom: "20px" }}>Upcoming Events</h3>
+            <section style={{ marginTop: "2rem" }}>
+              <h3 style={{ fontSize: "1.35rem", color: "#12649a", marginBottom: "20px" }}>
+                Upcoming Events
+              </h3>
               {sortedEvents.length === 0 ? (
                 <p>No upcoming events.</p>
               ) : (
@@ -298,22 +261,113 @@ export default function Dashboard() {
                         />
                       </div>
                       <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>{event.title}</strong>
-                      <span style={{ background: "#e4f1fb", color: "#2384cb", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.98rem" }}>{event.category}</span>
+                      <span style={{ background: "#e4f1fb", color: "#2384cb", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.98rem" }}>
+                        {event.category}
+                      </span>
                       <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>📍 {event.location || "N/A"}</div>
                       <div style={{ marginBottom: "10px", color: "#444", fontSize: "1rem" }}>🏫 {event.college || "N/A"} </div>
-                      
                       <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
                         {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
                       </div>
-                      <button style={registerBtn}>Register</button>
                     </div>
                   ))}
                 </div>
               )}
             </section>
+          </>
+        )}
 
+        {/* Student Dashboard */}
+        {user.role === "student" && (
+          <>
+            {/* Controls */}
+            <div style={{ marginBottom: "1rem", fontSize: "1.1rem", fontWeight: "500", color: "#0996e6" }}>
+              <label style={{ marginRight: "12px" }}>Sort by:</label>
+              <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} style={selectStyle}>
+                <option value="date">Start Date</option>
+                <option value="category">Category (A-Z)</option>
+              </select>
+
+              <label style={{ margin: "0 12px" }}>Filter by:</label>
+              <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={selectStyle}>
+                <option value="all">All</option>
+                <option value="sports">Sports</option>
+                <option value="hackathon">Hackathon</option>
+                <option value="cultural">Cultural</option>
+                <option value="workshop">Workshop</option>
+              </select>
+            </div>
+
+            {/* All Events */}
+            <section>
+              <h3 style={{ fontSize: "1.35rem", color: "#12649a", marginBottom: "20px" }}>Events</h3>
+              {displayEvents.length === 0 ? (
+                <p>No events available.</p>
+              ) : (
+                <div style={eventCardGrid}>
+  {displayEvents.map((event) => {
+    const isRegistered = event.registrations?.includes(user.id);
+    return (
+      <div key={event._id} style={isRegistered ? eventCardRegistered : eventCard}>
+        {isRegistered && (
+          <div style={{
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            background: "#1b7e59",
+            color: "white",
+            padding: "4px 10px",
+            borderRadius: "12px",
+            fontSize: "0.85rem",
+            fontWeight: "bold"
+          }}>
+            Registered
+          </div>
+        )}
+        <div style={{ marginBottom: "12px" }}>
+          <img
+            src={getEventImage(event.category)}
+            alt={event.category}
+            style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "10px" }}
+            onError={(e) => { e.target.src = "/default.jpg"; }}
+          />
+        </div>
+        <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>{event.title}</strong>
+        <span style={{
+          background: isRegistered ? "#e9fff0" : "#e4f1fb",
+          color: isRegistered ? "#1b7e59" : "#2384cb",
+          marginLeft: "10px",
+          padding: "3px 12px",
+          borderRadius: "18px",
+          fontSize: "0.98rem"
+        }}>
+          {event.category}
+        </span>
+        <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>📍 {event.location || "N/A"}</div>
+        <div style={{ marginBottom: "10px", color: "#444", fontSize: "1rem" }}>🏫 {event.college || "N/A"} </div>
+        <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
+          {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
+        </div>
+        <button
+          style={isRegistered ? registeredBtn : registerBtn}
+          onClick={() => !isRegistered && handleRegister(event._id)}
+          disabled={isRegistered}
+        >
+          {isRegistered ? "Registered ✅" : "Register"}
+        </button>
+      </div>
+    );
+  })}
+</div>
+
+              )}
+            </section>
+
+            {/* Registered Events */}
             <section style={{ marginTop: "3.3rem" }}>
-              <h3 style={{ fontSize: "1.19rem", color: "#1b7e59", marginBottom: "18px" }}>Your Registered Events</h3>
+              <h3 style={{ fontSize: "1.19rem", color: "#1b7e59", marginBottom: "18px" }}>
+                Your Registered Events
+              </h3>
               {registeredEvents.length === 0 ? (
                 <p>You haven’t registered for any events yet.</p>
               ) : (
@@ -329,7 +383,9 @@ export default function Dashboard() {
                         />
                       </div>
                       <strong style={{ fontSize: "1.18rem", color: "#137d52" }}>{event.title}</strong>
-                      <span style={{ background: "#e9fff0", color: "#1b7e59", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.96rem" }}>{event.category}</span>
+                      <span style={{ background: "#e9fff0", color: "#1b7e59", marginLeft: "10px", padding: "3px 12px", borderRadius: "18px", fontSize: "0.96rem" }}>
+                        {event.category}
+                      </span>
                       <div style={{ margin: "10px 0 10px 0", color: "#16623c", fontSize: "1.03rem" }}>📍 {event.location || "N/A"}</div>
                       <div style={{ color: "#488a60", fontSize: "0.97rem" }}>
                         {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
@@ -338,11 +394,6 @@ export default function Dashboard() {
                   ))}
                 </div>
               )}
-            </section>
-
-            <section style={{ marginTop: "2.8rem" }}>
-              <h3 style={{ fontSize: "1.08rem", color: "#0075C4" }}>Live Poll</h3>
-              <p style={{ color: "#444", fontSize: "1rem" }}>Vote and see results during events. (Feature coming soon 🚀)</p>
             </section>
           </>
         )}
