@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TicketDownload from "../components/TicketDownload";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:5000");
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -31,6 +34,22 @@ export default function Dashboard() {
       navigate("/login");
     } else {
       setUser({ name, email, role, id: userId, token });
+
+      if (role === "student" && userId) {
+        socket.emit("joinStudent", userId);
+
+        socket.on("registrationStatusChanged", (data) => {
+          alert(`🔔 ${data.message}`);
+          axios
+            .get(`${API}/student/my-events`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((res) => setRegisteredEvents(res.data))
+            .catch((err) =>
+              console.error("Failed to refresh registered events", err)
+            );
+        });
+      }
     }
 
     axios
@@ -40,7 +59,7 @@ export default function Dashboard() {
 
     if (role === "student" && token) {
       axios
-        .get(`${API}/events/my-registered`, {
+        .get(`${API}/student/my-events`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => setRegisteredEvents(res.data))
@@ -55,10 +74,15 @@ export default function Dashboard() {
         .then((res) => setStats(res.data))
         .catch((err) => console.error("Failed to load stats", err));
     }
+
+    return () => {
+      socket.off("registrationStatusChanged");
+    };
   }, [navigate]);
 
   if (!user) return <p style={{ textAlign: "center" }}>Loading...</p>;
 
+  // ✅ Filtering & sorting for both Admin + Student
   const filteredEvents =
     filterCategory === "all"
       ? events
@@ -79,7 +103,7 @@ export default function Dashboard() {
   const handleRegister = async (eventId) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API}/registrations`, {
+      const res = await fetch(`${API}/student/register-event`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,12 +115,17 @@ export default function Dashboard() {
       const data = await res.json();
       if (res.ok) {
         alert("✅ Registered successfully!");
-        const newRegisteredEvent = events.find((event) => event._id === eventId);
-        if (newRegisteredEvent) {
-          setRegisteredEvents((prev) => [...prev, newRegisteredEvent]);
-        }
         setJustRegisteredId(eventId);
         setTimeout(() => setJustRegisteredId(null), 2000);
+
+        axios
+          .get(`${API}/student/my-events`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => setRegisteredEvents(res.data))
+          .catch((err) =>
+            console.error("Failed to refresh registered events", err)
+          );
       } else {
         alert(data.message || "Error registering");
       }
@@ -105,12 +134,11 @@ export default function Dashboard() {
     }
   };
 
+  // ✅ Styling
   const containerOuter = {
     minHeight: "100vh",
     width: "100vw",
     background: "linear-gradient(120deg, #eaf6ff 60%, #d4edfb 100%)",
-    margin: 0,
-    padding: 0,
     display: "flex",
     justifyContent: "center",
   };
@@ -131,13 +159,9 @@ export default function Dashboard() {
     padding: "10px",
     borderRadius: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    textAlign: "center",
-    fontWeight: "600",
-    height: "120px",
     display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
     gap: "25px",
+    justifyContent: "center",
   };
   const statCard = {
     background: "linear-gradient(90deg, #0996e6, #29c2ee)",
@@ -160,16 +184,7 @@ export default function Dashboard() {
     borderRadius: "17px",
     boxShadow: "0 6px 34px 0px #bacee0",
     padding: "2rem 1.3rem 1.2rem 1.3rem",
-    display: "flex",
-    flexDirection: "column",
-    transition: "box-shadow .15s",
     position: "relative",
-  };
-  const eventCardRegistered = {
-    background: "#f7fff9",
-    borderRadius: "17px",
-    boxShadow: "0 6px 34px 0px #e0faed",
-    padding: "2rem 1.3rem 1.2rem 1.3rem",
   };
   const registerBtn = {
     marginTop: "18px",
@@ -182,10 +197,13 @@ export default function Dashboard() {
     fontSize: "1.07rem",
     cursor: "pointer",
     boxShadow: "0 2px 7px #cde8fa",
-    transition: "background .18s",
     alignSelf: "start",
   };
-  const registeredBtn = { ...registerBtn, background: "gray", cursor: "not-allowed" };
+  const registeredBtn = {
+    ...registerBtn,
+    background: "gray",
+    cursor: "not-allowed",
+  };
   const selectStyle = {
     padding: "8px 12px",
     borderRadius: "6px",
@@ -193,7 +211,6 @@ export default function Dashboard() {
     fontSize: "1rem",
     color: "#14476f",
     cursor: "pointer",
-    transition: "all 0.2s ease",
   };
 
   const getEventImage = (category) => {
@@ -219,19 +236,18 @@ export default function Dashboard() {
         </h1>
         <h2>Welcome, {user.name}!</h2>
 
-        {/* ADMIN PANEL */}
+        {/* ========== ADMIN DASHBOARD ========== */}
         {user.role === "college_admin" && (
           <>
             <div style={statsGrid}>
-              <div style={statCard}>📈 View Analytics</div>
               <div style={statCard}>📅 Total Events: {stats.totalEvents}</div>
+              <div style={statCard}>📝 Registrations: {stats.totalRegistrations}</div>
               <div style={statCard}>👥 Active Users: {stats.activeUsers}</div>
-              <div style={statCard}>📝 Total Registrations: {stats.totalRegistrations}</div>
               <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
             </div>
 
-            {/* Sorting & Filtering for Admin */}
-            <div style={{ margin: "1.5rem 0", fontSize: "1.1rem", fontWeight: "500", color: "#0996e6" }}>
+            {/* ✅ Sorting & Filtering for Admin */}
+            <div style={{ margin: "1.5rem 0", fontWeight: 500, color: "#0996e6" }}>
               <label style={{ marginRight: "12px" }}>Sort by:</label>
               <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} style={selectStyle}>
                 <option value="date">Start Date</option>
@@ -248,65 +264,39 @@ export default function Dashboard() {
             </div>
 
             <section>
-              <h3 style={{ fontSize: "1.35rem", color: "#12649a", marginBottom: "20px" }}>
-                Upcoming Events
-              </h3>
-              {displayEvents.length === 0 ? (
-                <p>No upcoming events.</p>
-              ) : (
-                <div style={eventCardGrid}>
-                  {displayEvents.map((event) => (
-                    <div key={event._id} style={eventCard}>
-                      <div style={{ marginBottom: "12px" }}>
-                        <img
-                          src={getEventImage(event.category)}
-                          alt={event.category}
-                          style={{
-                            width: "100%",
-                            height: "150px",
-                            objectFit: "cover",
-                            borderRadius: "10px",
-                          }}
-                          onError={(e) => {
-                            e.target.src = "/default.jpg";
-                          }}
-                        />
-                      </div>
-                      <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>{event.title}</strong>
-                      <span
-                        style={{
-                          background: "#e4f1fb",
-                          color: "#2384cb",
-                          marginLeft: "10px",
-                          padding: "3px 12px",
-                          borderRadius: "18px",
-                          fontSize: "0.98rem",
-                        }}
-                      >
-                        {event.category}
-                      </span>
-                      <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>
-                        📍 {event.location || "N/A"}
-                      </div>
-                      <div style={{ marginBottom: "10px", color: "#444", fontSize: "1rem" }}>
-                        🏫 {event.college || "N/A"}
-                      </div>
-                      <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
-                        {new Date(event.startDate).toLocaleDateString()} -{" "}
-                        {new Date(event.endDate).toLocaleDateString()}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <h3 style={{ margin: "20px 0" }}>Upcoming Events</h3>
+              <div style={eventCardGrid}>
+                {displayEvents.map((event) => (
+                  <div key={event._id} style={eventCard}>
+                    <img
+                      src={getEventImage(event.category)}
+                      alt={event.category}
+                      style={{
+                        width: "100%",
+                        height: "150px",
+                        objectFit: "cover",
+                        borderRadius: "10px",
+                        marginBottom: "12px",
+                      }}
+                    />
+                    <h4>{event.title}</h4>
+                    <p>{event.category}</p>
+                    <p>
+                      {new Date(event.startDate).toLocaleDateString()} -{" "}
+                      {new Date(event.endDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </section>
           </>
         )}
 
-        {/* STUDENT DASHBOARD */}
+        {/* ========== STUDENT DASHBOARD ========== */}
         {user.role === "student" && (
           <>
-            <div style={{ marginBottom: "1rem", fontSize: "1.1rem", fontWeight: "500", color: "#0996e6" }}>
+            {/* Sort + Filter controls */}
+            <div style={{ margin: "1.5rem 0", fontWeight: 500, color: "#0996e6" }}>
               <label style={{ marginRight: "12px" }}>Sort by:</label>
               <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} style={selectStyle}>
                 <option value="date">Start Date</option>
@@ -323,136 +313,79 @@ export default function Dashboard() {
             </div>
 
             <section>
-              <h3 style={{ fontSize: "1.35rem", color: "#12649a", marginBottom: "20px" }}>Events</h3>
-              {displayEvents.length === 0 ? (
-                <p>No events available.</p>
-              ) : (
-                <div style={eventCardGrid}>
-                  {displayEvents.map((event) => {
-                    const isRegistered = registeredEvents.some((regEvent) => regEvent._id === event._id);
-                    return (
-                      <div key={event._id} style={isRegistered ? eventCardRegistered : eventCard}>
-                        {justRegisteredId === event._id && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "12px",
-                              right: "12px",
-                              background: "#1b7e59",
-                              color: "white",
-                              padding: "4px 10px",
-                              borderRadius: "12px",
-                              fontSize: "0.85rem",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            Registered
-                          </div>
-                        )}
-
-                        <div style={{ marginBottom: "12px" }}>
-                          <img
-                            src={getEventImage(event.category)}
-                            alt={event.category}
-                            style={{
-                              width: "100%",
-                              height: "150px",
-                              objectFit: "cover",
-                              borderRadius: "10px",
-                            }}
-                            onError={(e) => {
-                              e.target.src = "/default.jpg";
-                            }}
-                          />
-                        </div>
-                        <strong style={{ fontSize: "1.3rem", color: "#14476f" }}>{event.title}</strong>
-                        <span
-                          style={{
-                            background: isRegistered ? "#e9fff0" : "#e4f1fb",
-                            color: isRegistered ? "#1b7e59" : "#2384cb",
-                            marginLeft: "10px",
-                            padding: "3px 12px",
-                            borderRadius: "18px",
-                            fontSize: "0.98rem",
-                          }}
-                        >
-                          {event.category}
-                        </span>
-                        <div style={{ margin: "10px 0 14px 0", color: "#666", fontSize: "1.04rem" }}>
-                          📍 {event.location || "N/A"}
-                        </div>
-                        <div style={{ marginBottom: "10px", color: "#444", fontSize: "1rem" }}>
-                          🏫 {event.college || "N/A"}
-                        </div>
-                        <div style={{ color: "#888", fontSize: "0.97rem", marginBottom: "8px" }}>
-                          {new Date(event.startDate).toLocaleDateString()} -{" "}
-                          {new Date(event.endDate).toLocaleDateString()}
-                        </div>
-                        <button
-                          style={isRegistered ? registeredBtn : registerBtn}
-                          onClick={() => !isRegistered && handleRegister(event._id)}
-                          disabled={isRegistered}
-                        >
-                          {isRegistered ? "Registered ✅" : "Register"}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-
-            <section style={{ marginTop: "3.3rem" }}>
-              <h3 style={{ fontSize: "1.19rem", color: "#1b7e59", marginBottom: "18px" }}>
-                Your Registered Events
-              </h3>
-              {registeredEvents.length === 0 ? (
-                <p>You haven’t registered for any events yet.</p>
-              ) : (
-                <div style={eventCardGrid}>
-                  {registeredEvents.map((event) => (
-                    <div key={event._id} style={eventCardRegistered}>
-                      <div style={{ marginBottom: "12px" }}>
-                        <img
-                          src={getEventImage(event.category)}
-                          alt={event.category}
-                          style={{
-                            width: "100%",
-                            height: "150px",
-                            objectFit: "cover",
-                            borderRadius: "10px",
-                          }}
-                          onError={(e) => {
-                            e.target.src = "/default.jpg";
-                          }}
-                        />
-                      </div>
-                      <strong style={{ fontSize: "1.18rem", color: "#137d52" }}>{event.title}</strong>
-                      <span
+              <h3 style={{ marginBottom: "20px" }}>Available Events</h3>
+              <div style={eventCardGrid}>
+                {displayEvents.map((event) => {
+                  const reg = registeredEvents.find((r) => r.event._id === event._id);
+                  return (
+                    <div key={event._id} style={eventCard}>
+                      <img
+                        src={getEventImage(event.category)}
+                        alt={event.category}
                         style={{
-                          background: "#e9fff0",
-                          color: "#1b7e59",
-                          marginLeft: "10px",
-                          padding: "3px 12px",
-                          borderRadius: "18px",
-                          fontSize: "0.96rem",
+                          width: "100%",
+                          height: "150px",
+                          objectFit: "cover",
+                          borderRadius: "10px",
+                          marginBottom: "12px",
                         }}
-                      >
-                        {event.category}
-                      </span>
-                      <div style={{ margin: "10px 0 10px 0", color: "#16623c", fontSize: "1.03rem" }}>
-                        📍 {event.location || "N/A"}
-                      </div>
-                      <div style={{ color: "#488a60", fontSize: "0.97rem" }}>
+                      />
+                      <h4>{event.title}</h4>
+                      <p>{event.category}</p>
+                      <p>
                         {new Date(event.startDate).toLocaleDateString()} -{" "}
                         {new Date(event.endDate).toLocaleDateString()}
-                      </div>
-                      <TicketDownload event={event} user={user} />{" "}
-                      {/* ⬅️ Download Ticket Button */}
+                      </p>
+
+                      {reg ? (
+                        <div>
+                          <p>
+                            Status:{" "}
+                            {reg.status === "approved" ? (
+                              <span style={{ color: "green" }}>Approved ✅</span>
+                            ) : reg.status === "rejected" ? (
+                              <span style={{ color: "red" }}>Rejected ❌</span>
+                            ) : (
+                              <span style={{ color: "orange" }}>Pending ⏳</span>
+                            )}
+                          </p>
+                          {reg.status === "approved" && (
+                            <TicketDownload event={reg.event} user={user} />
+                          )}
+                        </div>
+                      ) : (
+                        <button style={registerBtn} onClick={() => handleRegister(event._id)}>
+                          Register
+                        </button>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
+                  );
+                })}
+              </div>
+            </section>
+
+            <section style={{ marginTop: "2rem" }}>
+              <h3>Your Registered Events</h3>
+              <div style={eventCardGrid}>
+                {registeredEvents.map((reg) => (
+                  <div key={reg._id} style={eventCard}>
+                    <h4>{reg.event.title}</h4>
+                    <p>
+                      Status:{" "}
+                      {reg.status === "approved" ? (
+                        <span style={{ color: "green" }}>Approved ✅</span>
+                      ) : reg.status === "rejected" ? (
+                        <span style={{ color: "red" }}>Rejected ❌</span>
+                      ) : (
+                        <span style={{ color: "orange" }}>Pending ⏳</span>
+                      )}
+                    </p>
+                    {reg.status === "approved" && (
+                      <TicketDownload event={reg.event} user={user} />
+                    )}
+                  </div>
+                ))}
+              </div>
             </section>
           </>
         )}

@@ -10,11 +10,21 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/auth/login", form);
+      // ✅ login request
+      const res = await axios.post("http://localhost:5000/api/auth/login", form);
+
+      // ✅ save everything to localStorage
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("name", res.data.name);
       localStorage.setItem("role", res.data.role);
       localStorage.setItem("college", res.data.college);
+
+      // ✅ MOST IMPORTANT → save userId (needed for socket.io)
+      if (res.data.userId) {
+        localStorage.setItem("userId", res.data.userId);
+      } else if (res.data._id) {
+        localStorage.setItem("userId", res.data._id);
+      }
 
       alert("✅ Login successful!");
       navigate("/dashboard");
@@ -31,7 +41,6 @@ export default function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        // background: "linear-gradient(135deg, #f3e8ff 0%, #e0c3fc 100%)",
         fontFamily: "Segoe UI, sans-serif",
       }}
     >
