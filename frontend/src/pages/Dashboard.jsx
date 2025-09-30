@@ -129,7 +129,7 @@ export default function Dashboard() {
     }
   };
 
-  // DELETE handler for admin
+  // DELETE handler for admin. ✅
   const handleDeleteEvent = async (eventId) => {
     const token = localStorage.getItem("token");
     if (window.confirm("Are you sure you want to delete this event?")) {
