@@ -1,28 +1,26 @@
+// routes/admin.js
 import express from "express";
 import Registration from "../models/Registration.js";
 import Event from "../models/Event.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { io } from "../server.js";
 
 const router = express.Router();
 
-// GET registrations for admin's events only
+// ✅ GET registrations for admin's events only
 router.get("/registrations", authMiddleware, async (req, res) => {
   if (req.user.role !== "college_admin") {
     return res.status(403).json({ message: "Forbidden" });
   }
 
   try {
-    // First, get all events created by this admin
     const adminEvents = await Event.find({ collegeId: req.user.id });
     const eventIds = adminEvents.map(event => event._id);
 
-    // Then get registrations for those events only
-    const registrations = await Registration.find({ 
-      event: { $in: eventIds } 
-    })
+    const registrations = await Registration.find({ event: { $in: eventIds } })
       .populate("student", "name email")
       .populate("event", "title category startDate endDate college")
-      .sort({ registeredAt: -1 }); // Most recent first
+      .sort({ registeredAt: -1 });
 
     res.json(registrations);
   } catch (err) {
@@ -31,18 +29,16 @@ router.get("/registrations", authMiddleware, async (req, res) => {
   }
 });
 
-// GET pending registrations only
+// ✅ GET pending registrations only
 router.get("/registrations/pending", authMiddleware, async (req, res) => {
   if (req.user.role !== "college_admin") {
     return res.status(403).json({ message: "Forbidden" });
   }
 
   try {
-    // Get all events created by this admin
     const adminEvents = await Event.find({ collegeId: req.user.id });
     const eventIds = adminEvents.map(event => event._id);
 
-    // Get only pending registrations for admin's events
     const registrations = await Registration.find({ 
       event: { $in: eventIds },
       status: "pending"
@@ -58,7 +54,7 @@ router.get("/registrations/pending", authMiddleware, async (req, res) => {
   }
 });
 
-// PUT approve registration
+// ✅ PUT approve registration + notify student
 router.put("/registrations/:id/approve", authMiddleware, async (req, res) => {
   if (req.user.role !== "college_admin") {
     return res.status(403).json({ message: "Forbidden" });
@@ -66,20 +62,27 @@ router.put("/registrations/:id/approve", authMiddleware, async (req, res) => {
 
   try {
     const registration = await Registration.findById(req.params.id)
-      .populate("event");
+      .populate("event")
+      .populate("student");
 
-    if (!registration) {
-      return res.status(404).json({ message: "Registration not found" });
-    }
+    if (!registration) return res.status(404).json({ message: "Registration not found" });
 
-    // Check if this registration belongs to admin's event
     if (registration.event.collegeId.toString() !== req.user.id) {
       return res.status(403).json({ message: "You can only approve registrations for your events" });
     }
 
     registration.status = "approved";
     registration.approvedAt = new Date();
+    registration.notification = `✅ Your registration for "${registration.event.title}" has been approved. You can now download your ticket.`;
+
     await registration.save();
+
+    // 🔔 Notify student live via Socket.IO
+    io.to(registration.student._id.toString()).emit("registrationStatusChanged", {
+      event: registration.event.title,
+      status: registration.status,
+      message: registration.notification,
+    });
 
     res.json({ message: "Registration approved successfully", registration });
   } catch (err) {
@@ -88,7 +91,7 @@ router.put("/registrations/:id/approve", authMiddleware, async (req, res) => {
   }
 });
 
-// PUT reject registration
+// ✅ PUT reject registration + notify student
 router.put("/registrations/:id/reject", authMiddleware, async (req, res) => {
   if (req.user.role !== "college_admin") {
     return res.status(403).json({ message: "Forbidden" });
@@ -96,20 +99,27 @@ router.put("/registrations/:id/reject", authMiddleware, async (req, res) => {
 
   try {
     const registration = await Registration.findById(req.params.id)
-      .populate("event");
+      .populate("event")
+      .populate("student");
 
-    if (!registration) {
-      return res.status(404).json({ message: "Registration not found" });
-    }
+    if (!registration) return res.status(404).json({ message: "Registration not found" });
 
-    // Check if this registration belongs to admin's event
     if (registration.event.collegeId.toString() !== req.user.id) {
       return res.status(403).json({ message: "You can only reject registrations for your events" });
     }
 
     registration.status = "rejected";
     registration.rejectedAt = new Date();
+    registration.notification = `❌ Your registration for "${registration.event.title}" has been rejected.`;
+
     await registration.save();
+
+    // 🔔 Notify student live via Socket.IO
+    io.to(registration.student._id.toString()).emit("registrationStatusChanged", {
+      event: registration.event.title,
+      status: registration.status,
+      message: registration.notification,
+    });
 
     res.json({ message: "Registration rejected successfully", registration });
   } catch (err) {
