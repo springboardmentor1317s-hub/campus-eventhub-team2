@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TicketDownload from "../components/TicketDownload";
+import CommentsSection from "../components/CommentsSection"; // Comments section import
 import { io } from "socket.io-client";
 
 const socket = io("http://localhost:5000");
@@ -32,22 +33,22 @@ export default function Dashboard() {
 
     if (!name || !role || !token) {
       navigate("/login");
-    } else {
-      setUser({ name, email, role, id: userId, token });
+      return;
+    }
 
-      if (role === "student" && userId) {
-        socket.emit("joinStudent", userId);
+    setUser({ name, email, role, id: userId, token });
 
-        socket.on("registrationStatusChanged", (data) => {
-          alert(`🔔 ${data.message}`);
-          axios
-            .get(`${API}/student/my-events`, {
-              headers: { Authorization: `Bearer ${token}` },
-            })
-            .then((res) => setRegisteredEvents(res.data))
-            .catch((err) => console.error("Failed to refresh registered events", err));
-        });
-      }
+    if (role === "student" && userId) {
+      socket.emit("joinStudent", userId);
+      socket.on("registrationStatusChanged", (data) => {
+        alert(`🔔 ${data.message}`);
+        axios
+          .get(`${API}/student/my-events`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => setRegisteredEvents(res.data))
+          .catch((err) => console.error("Failed to refresh registered events", err));
+      });
     }
 
     axios
@@ -80,11 +81,14 @@ export default function Dashboard() {
 
   if (!user) return <p style={{ textAlign: "center" }}>Loading...</p>;
 
-  // Filtering & sorting for both Admin + Student
+  // Filtering & sorting
   const filteredEvents =
     filterCategory === "all"
       ? events
-      : events.filter((event) => event.category.toLowerCase() === filterCategory);
+      : events.filter(
+          (event) =>
+            event.category.toLowerCase() === filterCategory.toLowerCase()
+        );
 
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     if (sortOption === "date")
@@ -96,7 +100,7 @@ export default function Dashboard() {
 
   const displayEvents = sortedEvents;
 
-  // REGISTER handler for students
+  // Register event for student
   const handleRegister = async (eventId) => {
     try {
       const token = localStorage.getItem("token");
@@ -129,7 +133,7 @@ export default function Dashboard() {
     }
   };
 
-  // DELETE handler for admin. ✅
+  // Delete event for admin
   const handleDeleteEvent = async (eventId) => {
     const token = localStorage.getItem("token");
     if (window.confirm("Are you sure you want to delete this event?")) {
@@ -145,7 +149,22 @@ export default function Dashboard() {
     }
   };
 
-  // Styling (unchanged)
+  const getEventImage = (category) => {
+    switch (category) {
+      case "Sports":
+        return "/sports.events.jpg";
+      case "Hackathon":
+        return "/hackathon.events.jpg";
+      case "Cultural":
+        return "/cultural.events.jpg";
+      case "Workshop":
+        return "/workshop.events.jpg";
+      default:
+        return "/default.jpg";
+    }
+  };
+
+  // Styles omitted for brevity, use your existing styles here
   const containerOuter = {
     minHeight: "100vh",
     width: "100vw",
@@ -210,11 +229,13 @@ export default function Dashboard() {
     boxShadow: "0 2px 7px #cde8fa",
     alignSelf: "start",
   };
+
   const registeredBtn = {
     ...registerBtn,
     background: "gray",
     cursor: "not-allowed",
   };
+
   const deleteBtn = {
     marginTop: "14px",
     padding: "10px 28px",
@@ -228,6 +249,7 @@ export default function Dashboard() {
     boxShadow: "0 2px 7px #eec2cc",
     alignSelf: "start",
   };
+
   const selectStyle = {
     padding: "8px 12px",
     borderRadius: "6px",
@@ -235,21 +257,6 @@ export default function Dashboard() {
     fontSize: "1rem",
     color: "#14476f",
     cursor: "pointer",
-  };
-
-  const getEventImage = (category) => {
-    switch (category) {
-      case "Sports":
-        return "/sports.events.jpg";
-      case "Hackathon":
-        return "/hackathon.events.jpg";
-      case "Cultural":
-        return "/cultural.events.jpg";
-      case "Workshop":
-        return "/workshop.events.jpg";
-      default:
-        return "/default.jpg";
-    }
   };
 
   return (
@@ -260,7 +267,7 @@ export default function Dashboard() {
         </h1>
         <h2>Welcome, {user.name}!</h2>
 
-        {/* ========== ADMIN DASHBOARD ========== */}
+        {/* Admin Dashboard */}
         {user.role === "college_admin" && (
           <>
             <div style={statsGrid}>
@@ -270,15 +277,23 @@ export default function Dashboard() {
               <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
             </div>
 
-            {/* ✅ Sorting & Filtering for Admin */}
+            {/* Sorting & Filtering for Admin */}
             <div style={{ margin: "1.5rem 0", fontWeight: 500, color: "#0996e6" }}>
               <label style={{ marginRight: "12px" }}>Sort by:</label>
-              <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} style={selectStyle}>
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                style={selectStyle}
+              >
                 <option value="date">Start Date</option>
                 <option value="category">Category (A-Z)</option>
               </select>
               <label style={{ margin: "0 12px" }}>Filter by:</label>
-              <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={selectStyle}>
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                style={selectStyle}
+              >
                 <option value="all">All</option>
                 <option value="sports">Sports</option>
                 <option value="hackathon">Hackathon</option>
@@ -287,6 +302,7 @@ export default function Dashboard() {
               </select>
             </div>
 
+            {/* Admin Events */}
             <section>
               <h3 style={{ margin: "20px 0" }}>Upcoming Events</h3>
               <div style={eventCardGrid}>
@@ -309,7 +325,6 @@ export default function Dashboard() {
                       {new Date(event.startDate).toLocaleDateString()} -{" "}
                       {new Date(event.endDate).toLocaleDateString()}
                     </p>
-                    {/* Delete option for admin */}
                     <button
                       style={deleteBtn}
                       onClick={() => handleDeleteEvent(event._id)}
@@ -323,18 +338,25 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* ========== STUDENT DASHBOARD ========== */}
+        {/* Student Dashboard */}
         {user.role === "student" && (
           <>
-            {/* Sort + Filter controls */}
             <div style={{ margin: "1.5rem 0", fontWeight: 500, color: "#0996e6" }}>
               <label style={{ marginRight: "12px" }}>Sort by:</label>
-              <select value={sortOption} onChange={(e) => setSortOption(e.target.value)} style={selectStyle}>
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                style={selectStyle}
+              >
                 <option value="date">Start Date</option>
                 <option value="category">Category (A-Z)</option>
               </select>
               <label style={{ margin: "0 12px" }}>Filter by:</label>
-              <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={selectStyle}>
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                style={selectStyle}
+              >
                 <option value="all">All</option>
                 <option value="sports">Sports</option>
                 <option value="hackathon">Hackathon</option>
@@ -385,16 +407,24 @@ export default function Dashboard() {
                           )}
                         </div>
                       ) : (
-                        <button style={registerBtn} onClick={() => handleRegister(event._id)}>
+                        <button
+                          style={registerBtn}
+                          onClick={() => handleRegister(event._id)}
+                        >
                           Register
                         </button>
                       )}
+                      
+                      {/* Comments Section under each event */}
+                      <CommentsSection eventId={event._id} />
+                      
                     </div>
                   );
                 })}
               </div>
             </section>
 
+            {/* Registered Events Section */}
             <section style={{ marginTop: "2rem" }}>
               <h3>Your Registered Events</h3>
               <div style={eventCardGrid}>
