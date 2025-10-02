@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TicketDownload from "../components/TicketDownload";
-import CommentsSection from "../components/CommentsSection"; // Comments section import
+import CommentsSection from "../components/CommentsSection";
 import { io } from "socket.io-client";
 
 const socket = io("http://localhost:5000");
@@ -20,6 +20,7 @@ export default function Dashboard() {
     activeUsers: 0,
     pendingReviews: 0,
   });
+  const [openCommentsId, setOpenCommentsId] = useState(null);
 
   const navigate = useNavigate();
   const API = "http://localhost:5000/api";
@@ -30,12 +31,10 @@ export default function Dashboard() {
     const role = localStorage.getItem("role");
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
-
     if (!name || !role || !token) {
       navigate("/login");
       return;
     }
-
     setUser({ name, email, role, id: userId, token });
 
     if (role === "student" && userId) {
@@ -81,26 +80,21 @@ export default function Dashboard() {
 
   if (!user) return <p style={{ textAlign: "center" }}>Loading...</p>;
 
-  // Filtering & sorting
   const filteredEvents =
     filterCategory === "all"
       ? events
       : events.filter(
-          (event) =>
-            event.category.toLowerCase() === filterCategory.toLowerCase()
+          (event) => event.category.toLowerCase() === filterCategory.toLowerCase()
         );
 
   const sortedEvents = [...filteredEvents].sort((a, b) => {
-    if (sortOption === "date")
-      return new Date(a.startDate) - new Date(b.startDate);
-    if (sortOption === "category")
-      return a.category.localeCompare(b.category);
+    if (sortOption === "date") return new Date(a.startDate) - new Date(b.startDate);
+    if (sortOption === "category") return a.category.localeCompare(b.category);
     return 0;
   });
 
   const displayEvents = sortedEvents;
 
-  // Register event for student
   const handleRegister = async (eventId) => {
     try {
       const token = localStorage.getItem("token");
@@ -112,13 +106,11 @@ export default function Dashboard() {
         },
         body: JSON.stringify({ eventId }),
       });
-
       const data = await res.json();
       if (res.ok) {
         alert("✅ Registered successfully!");
         setJustRegisteredId(eventId);
         setTimeout(() => setJustRegisteredId(null), 2000);
-
         axios
           .get(`${API}/student/my-events`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -133,7 +125,6 @@ export default function Dashboard() {
     }
   };
 
-  // Delete event for admin
   const handleDeleteEvent = async (eventId) => {
     const token = localStorage.getItem("token");
     if (window.confirm("Are you sure you want to delete this event?")) {
@@ -164,7 +155,6 @@ export default function Dashboard() {
     }
   };
 
-  // Styles omitted for brevity, use your existing styles here
   const containerOuter = {
     minHeight: "100vh",
     width: "100vw",
@@ -229,13 +219,11 @@ export default function Dashboard() {
     boxShadow: "0 2px 7px #cde8fa",
     alignSelf: "start",
   };
-
   const registeredBtn = {
     ...registerBtn,
     background: "gray",
     cursor: "not-allowed",
   };
-
   const deleteBtn = {
     marginTop: "14px",
     padding: "10px 28px",
@@ -249,7 +237,6 @@ export default function Dashboard() {
     boxShadow: "0 2px 7px #eec2cc",
     alignSelf: "start",
   };
-
   const selectStyle = {
     padding: "8px 12px",
     borderRadius: "6px",
@@ -276,8 +263,6 @@ export default function Dashboard() {
               <div style={statCard}>👥 Active Users: {stats.activeUsers}</div>
               <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
             </div>
-
-            {/* Sorting & Filtering for Admin */}
             <div style={{ margin: "1.5rem 0", fontWeight: 500, color: "#0996e6" }}>
               <label style={{ marginRight: "12px" }}>Sort by:</label>
               <select
@@ -301,8 +286,6 @@ export default function Dashboard() {
                 <option value="workshop">Workshop</option>
               </select>
             </div>
-
-            {/* Admin Events */}
             <section>
               <h3 style={{ margin: "20px 0" }}>Upcoming Events</h3>
               <div style={eventCardGrid}>
@@ -364,7 +347,7 @@ export default function Dashboard() {
                 <option value="workshop">Workshop</option>
               </select>
             </div>
-
+            {/* Available Events: Comments Button SHOWN */}
             <section>
               <h3 style={{ marginBottom: "20px" }}>Available Events</h3>
               <div style={eventCardGrid}>
@@ -389,7 +372,6 @@ export default function Dashboard() {
                         {new Date(event.startDate).toLocaleDateString()} -{" "}
                         {new Date(event.endDate).toLocaleDateString()}
                       </p>
-
                       {reg ? (
                         <div>
                           <p>
@@ -407,24 +389,44 @@ export default function Dashboard() {
                           )}
                         </div>
                       ) : (
-                        <button
-                          style={registerBtn}
-                          onClick={() => handleRegister(event._id)}
-                        >
-                          Register
-                        </button>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px" }}>
+                          <button
+                            style={registerBtn}
+                            onClick={() => handleRegister(event._id)}
+                          >
+                            Register
+                          </button>
+                          <button
+                            style={{
+                              marginTop: "18px",
+                              padding: "10px 28px",
+                              background: "#eee",
+                              color: "#14476f",
+                              fontWeight: 600,
+                              border: "1px solid #0996e6",
+                              borderRadius: "9px",
+                              fontSize: "1.07rem",
+                              cursor: "pointer",
+                              boxShadow: "0 2px 7px #cde8fa",
+                              alignSelf: "start",
+                            }}
+                            onClick={() =>
+                              setOpenCommentsId(openCommentsId === event._id ? null : event._id)
+                            }
+                          >
+                            {openCommentsId === event._id ? "Hide Comments" : "Comments"}
+                          </button>
+                        </div>
                       )}
-                      
-                      {/* Comments Section under each event */}
-                      <CommentsSection eventId={event._id} />
-                      
+                      {openCommentsId === event._id && (
+                        <CommentsSection eventId={event._id} />
+                      )}
                     </div>
                   );
                 })}
               </div>
             </section>
-
-            {/* Registered Events Section */}
+            {/* Registered Events: Comments Button/box NOT SHOWN */}
             <section style={{ marginTop: "2rem" }}>
               <h3>Your Registered Events</h3>
               <div style={eventCardGrid}>
@@ -444,6 +446,7 @@ export default function Dashboard() {
                     {reg.status === "approved" && (
                       <TicketDownload event={reg.event} user={user} />
                     )}
+                    {/* Comments Button NOT SHOWN in registered section */}
                   </div>
                 ))}
               </div>
