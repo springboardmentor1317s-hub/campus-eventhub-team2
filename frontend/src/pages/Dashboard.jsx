@@ -84,8 +84,8 @@ export default function Dashboard() {
     filterCategory === "all"
       ? events
       : events.filter(
-          (event) => event.category.toLowerCase() === filterCategory.toLowerCase()
-        );
+        (event) => event.category.toLowerCase() === filterCategory.toLowerCase()
+      );
 
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     if (sortOption === "date") return new Date(a.startDate) - new Date(b.startDate);
