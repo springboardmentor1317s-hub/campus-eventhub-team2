@@ -71,6 +71,22 @@ router.get("/my-events", authMiddleware, roleMiddleware(["college_admin"]), asyn
 });
 
 // =============================
+// 📌 Get Single Event by ID
+// =============================
+router.get("/:eventId", async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.eventId);
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+    res.json(event);
+  } catch (err) {
+    console.error("❌ Error fetching event:", err);
+    res.status(500).json({ error: "Failed to fetch event" });
+  }
+});
+
+// =============================
 // 📌 Get All Upcoming Events (For Students)
 // =============================
 router.get("/", async (req, res) => {

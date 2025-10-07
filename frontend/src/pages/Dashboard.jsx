@@ -14,6 +14,8 @@ export default function Dashboard() {
   const [justRegisteredId, setJustRegisteredId] = useState(null);
   const [sortOption, setSortOption] = useState("date");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [searchTitle, setSearchTitle] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
   const [stats, setStats] = useState({
     totalEvents: 0,
     totalRegistrations: 0,
@@ -21,8 +23,7 @@ export default function Dashboard() {
     pendingReviews: 0,
   });
   const [openCommentsId, setOpenCommentsId] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
+
 
   const navigate = useNavigate();
   const API = "http://localhost:5000/api";
@@ -110,12 +111,12 @@ export default function Dashboard() {
 
   if (!user) return <p style={{ textAlign: "center" }}>Loading...</p>;
 
-  const filteredEvents =
-    filterCategory === "all"
-      ? events
-      : events.filter(
-        (event) => event.category.toLowerCase() === filterCategory.toLowerCase()
-      );
+  const filteredEvents = events.filter((event) => {
+    const matchesCategory = filterCategory === "all" || event.category.toLowerCase() === filterCategory.toLowerCase();
+    const matchesTitle = searchTitle === "" || event.title.toLowerCase().includes(searchTitle.toLowerCase());
+    const matchesLocation = searchLocation === "" || (event.location && event.location.toLowerCase().includes(searchLocation.toLowerCase()));
+    return matchesCategory && matchesTitle && matchesLocation;
+  });
 
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     if (sortOption === "date") return new Date(a.startDate) - new Date(b.startDate);
@@ -390,53 +391,7 @@ export default function Dashboard() {
     display: "inline-block",
     marginTop: "10px",
   };
-  const modalOverlay = {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "rgba(0, 0, 0, 0.7)",
-    zIndex: 1000,
-    backdropFilter: "blur(5px)",
-  };
-  const modalContent = {
-    background: "white",
-    borderRadius: "20px",
-    width: "380px",
-    maxHeight: "80vh",
-    overflow: "auto",
-    position: "fixed",
-    boxShadow: "0 25px 50px rgba(0, 0, 0, 0.25)",
-    left: modalPosition.x,
-    top: modalPosition.y,
-    zIndex: 1001,
-  };
-  const modalHeader = {
-    position: "relative",
-    height: "250px",
-    overflow: "hidden",
-  };
-  const modalBody = {
-    padding: "30px",
-  };
-  const closeBtn = {
-    position: "absolute",
-    top: "15px",
-    right: "15px",
-    background: "rgba(0, 0, 0, 0.5)",
-    color: "white",
-    border: "none",
-    borderRadius: "50%",
-    width: "40px",
-    height: "40px",
-    fontSize: "1.2rem",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1,
-  };
+
 
   return (
     <div style={containerOuter}>
@@ -493,7 +448,37 @@ export default function Dashboard() {
             </div>
             <div style={controlsContainer}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <label style={{ fontWeight: "600", color: "#4a5568" }}>🔍 Sort by:</label>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📝 Title:</label>
+                <input
+                  type="text"
+                  placeholder="Search by title..."
+                  value={searchTitle}
+                  onChange={(e) => setSearchTitle(e.target.value)}
+                  style={{
+                    ...selectStyle,
+                    minWidth: "200px"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📍 Location:</label>
+                <input
+                  type="text"
+                  placeholder="Search by location..."
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                  style={{
+                    ...selectStyle,
+                    minWidth: "200px"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📊 Sort by:</label>
                 <select
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
@@ -532,13 +517,8 @@ export default function Dashboard() {
                   }} onMouseLeave={(e) => {
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.boxShadow = "0 10px 30px rgba(0, 0, 0, 0.1)";
-                  }} onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setModalPosition({
-                      x: rect.left,
-                      y: rect.top
-                    });
-                    setSelectedEvent(event);
+                  }} onClick={() => {
+                    navigate(`/event-details/${event._id}`);
                   }}>
                     <img
                       src={getEventImage(event.category)}
@@ -555,23 +535,42 @@ export default function Dashboard() {
                       <p style={eventDate}>
                         📅 {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
                       </p>
-                      <button
-                        style={deleteBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteEvent(event._id);
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.transform = "translateY(-2px)";
-                          e.target.style.boxShadow = "0 6px 20px rgba(245, 101, 101, 0.4)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.transform = "translateY(0)";
-                          e.target.style.boxShadow = "0 4px 15px rgba(245, 101, 101, 0.3)";
-                        }}
-                      >
-                        🗑️ Delete Event
-                      </button>
+                      <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+                        <button
+                          style={editBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/create-event?edit=${event._id}`);
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = "translateY(-2px)";
+                            e.target.style.boxShadow = "0 6px 20px rgba(237, 137, 54, 0.4)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = "translateY(0)";
+                            e.target.style.boxShadow = "0 4px 15px rgba(237, 137, 54, 0.3)";
+                          }}
+                        >
+                          ✏️ Edit Event
+                        </button>
+                        <button
+                          style={deleteBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteEvent(event._id);
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = "translateY(-2px)";
+                            e.target.style.boxShadow = "0 6px 20px rgba(245, 101, 101, 0.4)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = "translateY(0)";
+                            e.target.style.boxShadow = "0 4px 15px rgba(245, 101, 101, 0.3)";
+                          }}
+                        >
+                          🗑️ Delete Event
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -585,7 +584,37 @@ export default function Dashboard() {
           <>
             <div style={controlsContainer}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <label style={{ fontWeight: "600", color: "#4a5568" }}>🔍 Sort by:</label>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📝 Title:</label>
+                <input
+                  type="text"
+                  placeholder="Search by title..."
+                  value={searchTitle}
+                  onChange={(e) => setSearchTitle(e.target.value)}
+                  style={{
+                    ...selectStyle,
+                    minWidth: "200px"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📍 Location:</label>
+                <input
+                  type="text"
+                  placeholder="Search by location..."
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                  style={{
+                    ...selectStyle,
+                    minWidth: "200px"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📊 Sort by:</label>
                 <select
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
@@ -627,13 +656,8 @@ export default function Dashboard() {
                     }} onMouseLeave={(e) => {
                       e.currentTarget.style.transform = "translateY(0)";
                       e.currentTarget.style.boxShadow = "0 10px 30px rgba(0, 0, 0, 0.1)";
-                    }} onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setModalPosition({
-                        x: rect.left,
-                        y: rect.top
-                      });
-                      setSelectedEvent(event);
+                    }} onClick={() => {
+                      navigate(`/event-details/${event._id}`);
                     }}>
                       <img
                         src={getEventImage(event.category)}
@@ -757,109 +781,7 @@ export default function Dashboard() {
           </>
         )}
         
-        {/* Event Details Modal */}
-        {selectedEvent && (
-          <div style={modalOverlay} onClick={() => setSelectedEvent(null)}>
-            <div style={modalContent} onClick={(e) => e.stopPropagation()}>
-              <button style={closeBtn} onClick={() => setSelectedEvent(null)}>×</button>
-              <div style={modalHeader}>
-                <img
-                  src={getEventImage(selectedEvent.category)}
-                  alt={selectedEvent.category}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-              <div style={modalBody}>
-                <h2 style={{...eventTitle, fontSize: "1.8rem", marginBottom: "15px"}}>{selectedEvent.title}</h2>
-                <span style={eventCategory}>{selectedEvent.category}</span>
-                
-                <div style={{marginTop: "20px"}}>
-                  <h3 style={{color: "#4a5568", fontSize: "1.1rem", marginBottom: "10px"}}>📅 Event Dates</h3>
-                  <p style={{color: "#718096", marginBottom: "15px"}}>
-                    <strong>Start:</strong> {new Date(selectedEvent.startDate).toLocaleDateString()} at {new Date(selectedEvent.startDate).toLocaleTimeString()}<br/>
-                    <strong>End:</strong> {new Date(selectedEvent.endDate).toLocaleDateString()} at {new Date(selectedEvent.endDate).toLocaleTimeString()}
-                  </p>
-                </div>
-                
-                {selectedEvent.description && (
-                  <div style={{marginTop: "20px"}}>
-                    <h3 style={{color: "#4a5568", fontSize: "1.1rem", marginBottom: "10px"}}>📝 Description</h3>
-                    <p style={{color: "#718096", lineHeight: "1.6", marginBottom: "15px"}}>{selectedEvent.description}</p>
-                  </div>
-                )}
-                
-                {selectedEvent.location && (
-                  <div style={{marginTop: "20px"}}>
-                    <h3 style={{color: "#4a5568", fontSize: "1.1rem", marginBottom: "10px"}}>📍 Location</h3>
-                    <p style={{color: "#718096", marginBottom: "15px"}}>{selectedEvent.location}</p>
-                  </div>
-                )}
-                
-                {selectedEvent.maxParticipants && (
-                  <div style={{marginTop: "20px"}}>
-                    <h3 style={{color: "#4a5568", fontSize: "1.1rem", marginBottom: "10px"}}>👥 Capacity</h3>
-                    <p style={{color: "#718096", marginBottom: "15px"}}>{selectedEvent.maxParticipants} participants</p>
-                  </div>
-                )}
-                
-                {selectedEvent.organizer && (
-                  <div style={{marginTop: "20px"}}>
-                    <h3 style={{color: "#4a5568", fontSize: "1.1rem", marginBottom: "10px"}}>👤 Organizer</h3>
-                    <p style={{color: "#718096", marginBottom: "15px"}}>{selectedEvent.organizer}</p>
-                  </div>
-                )}
-                
-                <div style={{marginTop: "30px", display: "flex", gap: "10px", justifyContent: "center"}}>
-                  {user.role === "student" && !registeredEvents.find((r) => r.event._id === selectedEvent._id) && (
-                    <button
-                      style={registerBtn}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRegister(selectedEvent._id);
-                        setSelectedEvent(null);
-                      }}
-                    >
-                      ✨ Register for Event
-                    </button>
-                  )}
-                  {user.role === "college_admin" && (
-                    <button
-                      style={editBtn}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/create-event?edit=${selectedEvent._id}`);
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.transform = "translateY(-2px)";
-                        e.target.style.boxShadow = "0 6px 20px rgba(237, 137, 54, 0.4)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.transform = "translateY(0)";
-                        e.target.style.boxShadow = "0 4px 15px rgba(237, 137, 54, 0.3)";
-                      }}
-                    >
-                      ✏️ Edit Event
-                    </button>
-                  )}
-                  <button
-                    style={{
-                      ...commentsBtn,
-                      background: "#e2e8f0",
-                      border: "none",
-                    }}
-                    onClick={() => setSelectedEvent(null)}
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );

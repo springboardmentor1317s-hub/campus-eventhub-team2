@@ -12,6 +12,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreateEvent from "./pages/CreateEvent";
 import EventList from "./pages/EventList";
+import EventDetails from "./pages/EventDetails";
 import Registrations from "./pages/Registrations"; // Admin Registrations
 
 // Components
@@ -44,6 +45,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/events" element={<EventList />} />
+            <Route path="/event-details/:eventId" element={<EventDetails />} />
 
             {/* Student or Admin */}
             <Route
