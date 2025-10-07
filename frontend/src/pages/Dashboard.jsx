@@ -156,6 +156,36 @@ export default function Dashboard() {
     }
   };
 
+  const handleCancelRegistration = async (eventId) => {
+    if (window.confirm("Are you sure you want to cancel your registration?")) {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API}/student/cancel-registration`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ eventId }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("✅ Registration cancelled successfully!");
+          axios
+            .get(`${API}/student/my-events`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((res) => setRegisteredEvents(res.data))
+            .catch((err) => console.error("Failed to refresh registered events", err));
+        } else {
+          alert(data.message || "Error cancelling registration");
+        }
+      } catch (err) {
+        alert("❌ Network error while cancelling registration");
+      }
+    }
+  };
+
   const handleDeleteEvent = async (eventId) => {
     const token = localStorage.getItem("token");
     if (window.confirm("Are you sure you want to delete this event?")) {
@@ -190,80 +220,89 @@ export default function Dashboard() {
   const containerOuter = {
     minHeight: "100vh",
     width: "100vw",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
     display: "flex",
     justifyContent: "center",
     padding: "20px 0",
+    position: "relative",
+    overflow: "hidden",
   };
   const containerInner = {
     width: "100%",
-    maxWidth: "1400px",
+    maxWidth: "1500px",
     margin: "0 auto",
-    background: "rgba(255, 255, 255, 0.95)",
-    borderRadius: "20px",
-    boxShadow: "0 25px 50px rgba(0, 0, 0, 0.15)",
-    minHeight: "90vh",
-    padding: "40px",
+    background: "rgba(255, 255, 255, 0.98)",
+    borderRadius: "24px",
+    boxShadow: "0 30px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+    minHeight: "95vh",
+    padding: "50px",
     display: "flex",
     flexDirection: "column",
-    backdropFilter: "blur(10px)",
+    backdropFilter: "blur(20px)",
     position: "relative",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
   };
   const headerStyle = {
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
-    fontSize: "3.2rem",
-    fontWeight: "800",
-    marginBottom: "15px",
+    fontSize: "3.8rem",
+    fontWeight: "900",
+    marginBottom: "20px",
     textAlign: "center",
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-    letterSpacing: "-0.02em",
+    letterSpacing: "-0.03em",
+    textShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
   };
   const welcomeStyle = {
-    fontSize: "1.6rem",
-    color: "#4a5568",
+    fontSize: "1.8rem",
+    color: "#2d3748",
     textAlign: "center",
-    marginBottom: "35px",
+    marginBottom: "45px",
     fontWeight: "600",
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
     letterSpacing: "-0.01em",
+    opacity: "0.8",
   };
   const statsGrid = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "20px",
-    marginBottom: "40px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "15px",
+    marginBottom: "30px",
   };
   const statCard = {
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
     color: "white",
-    padding: "25px",
-    borderRadius: "15px",
+    padding: "20px 15px",
+    borderRadius: "16px",
     textAlign: "center",
     fontWeight: "600",
-    fontSize: "1.1rem",
-    boxShadow: "0 10px 25px rgba(102, 126, 234, 0.3)",
-    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    fontSize: "0.9rem",
+    boxShadow: "0 8px 20px rgba(102, 126, 234, 0.3), 0 3px 10px rgba(0, 0, 0, 0.1)",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
     cursor: "pointer",
+    position: "relative",
+    overflow: "hidden",
   };
   const statNumber = {
-    fontSize: "3rem",
-    fontWeight: "800",
+    fontSize: "2rem",
+    fontWeight: "700",
     display: "block",
-    marginBottom: "8px",
+    marginBottom: "5px",
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
   };
   const controlsContainer = {
-    background: "#f8fafc",
-    padding: "20px",
-    borderRadius: "12px",
-    marginBottom: "30px",
+    background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
+    padding: "30px",
+    borderRadius: "18px",
+    marginBottom: "40px",
     display: "flex",
-    gap: "20px",
+    gap: "25px",
     alignItems: "center",
     flexWrap: "wrap",
-    border: "1px solid #e2e8f0",
+    border: "1px solid rgba(226, 232, 240, 0.6)",
+    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
+    backdropFilter: "blur(10px)",
   };
   const eventCardGrid = {
     display: "grid",
@@ -271,14 +310,14 @@ export default function Dashboard() {
     gap: "25px",
   };
   const eventCard = {
-    background: "#ffffff",
-    borderRadius: "20px",
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
+    background: "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
+    borderRadius: "24px",
+    boxShadow: "0 15px 40px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.08)",
     padding: "0",
     position: "relative",
     overflow: "hidden",
-    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-    border: "1px solid #e2e8f0",
+    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    border: "1px solid rgba(226, 232, 240, 0.6)",
   };
   const eventCardContent = {
     padding: "25px",
@@ -315,29 +354,32 @@ export default function Dashboard() {
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
   };
   const registerBtn = {
-    padding: "12px 24px",
+    padding: "14px 28px",
     background: "linear-gradient(135deg, #48bb78 0%, #38a169 100%)",
     color: "white",
     fontWeight: "600",
     border: "none",
-    borderRadius: "10px",
+    borderRadius: "12px",
     fontSize: "1rem",
     cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 4px 15px rgba(72, 187, 120, 0.3)",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    boxShadow: "0 6px 20px rgba(72, 187, 120, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1)",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
   };
   const commentsBtn = {
-    padding: "12px 24px",
-    background: "#f7fafc",
+    padding: "14px 28px",
+    background: "linear-gradient(145deg, #f7fafc 0%, #ffffff 100%)",
     color: "#4a5568",
     fontWeight: "600",
-    border: "2px solid #e2e8f0",
-    borderRadius: "10px",
+    border: "2px solid rgba(226, 232, 240, 0.8)",
+    borderRadius: "12px",
     fontSize: "1rem",
     cursor: "pointer",
-    transition: "all 0.3s ease",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
   };
-  const deleteBtn = {
+  const cancelBtn = {
     padding: "12px 24px",
     background: "linear-gradient(135deg, #f56565 0%, #e53e3e 100%)",
     color: "white",
@@ -349,28 +391,45 @@ export default function Dashboard() {
     transition: "all 0.3s ease",
     boxShadow: "0 4px 15px rgba(245, 101, 101, 0.3)",
   };
+  const deleteBtn = {
+    padding: "14px 28px",
+    background: "linear-gradient(135deg, #f56565 0%, #e53e3e 100%)",
+    color: "white",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "12px",
+    fontSize: "1rem",
+    cursor: "pointer",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    boxShadow: "0 6px 20px rgba(245, 101, 101, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1)",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+  };
   const editBtn = {
-    padding: "12px 24px",
+    padding: "14px 28px",
     background: "linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)",
     color: "white",
     fontWeight: "600",
     border: "none",
-    borderRadius: "10px",
+    borderRadius: "12px",
     fontSize: "1rem",
     cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 4px 15px rgba(237, 137, 54, 0.3)",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    boxShadow: "0 6px 20px rgba(237, 137, 54, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1)",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
   };
+
   const selectStyle = {
-    padding: "10px 15px",
-    borderRadius: "8px",
-    border: "2px solid #e2e8f0",
+    padding: "12px 18px",
+    borderRadius: "12px",
+    border: "2px solid rgba(226, 232, 240, 0.8)",
     fontSize: "1rem",
-    color: "#4a5568",
+    color: "#2d3748",
     cursor: "pointer",
-    background: "white",
-    transition: "border-color 0.3s ease",
-    minWidth: "150px",
+    background: "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
+    transition: "all 0.3s ease",
+    minWidth: "180px",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+    fontWeight: "500",
   };
   const sectionTitle = {
     fontSize: "2.2rem",
@@ -406,41 +465,41 @@ export default function Dashboard() {
           <>
             <div style={statsGrid}>
               <div style={statCard} onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-5px)";
-                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4)";
+                e.target.style.transform = "translateY(-8px) scale(1.02)";
+                e.target.style.boxShadow = "0 25px 50px rgba(102, 126, 234, 0.5), 0 10px 25px rgba(0, 0, 0, 0.15)";
               }} onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0)";
-                e.target.style.boxShadow = "0 10px 25px rgba(102, 126, 234, 0.3)";
+                e.target.style.transform = "translateY(0) scale(1)";
+                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4), 0 5px 15px rgba(0, 0, 0, 0.1)";
               }}>
                 <span style={statNumber}>{stats.totalEvents}</span>
                 📅 Total Events
               </div>
               <div style={statCard} onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-5px)";
-                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4)";
+                e.target.style.transform = "translateY(-8px) scale(1.02)";
+                e.target.style.boxShadow = "0 25px 50px rgba(102, 126, 234, 0.5), 0 10px 25px rgba(0, 0, 0, 0.15)";
               }} onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0)";
-                e.target.style.boxShadow = "0 10px 25px rgba(102, 126, 234, 0.3)";
+                e.target.style.transform = "translateY(0) scale(1)";
+                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4), 0 5px 15px rgba(0, 0, 0, 0.1)";
               }}>
                 <span style={statNumber}>{stats.totalRegistrations}</span>
                 📝 Total Registrations
               </div>
               <div style={statCard} onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-5px)";
-                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4)";
+                e.target.style.transform = "translateY(-8px) scale(1.02)";
+                e.target.style.boxShadow = "0 25px 50px rgba(102, 126, 234, 0.5), 0 10px 25px rgba(0, 0, 0, 0.15)";
               }} onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0)";
-                e.target.style.boxShadow = "0 10px 25px rgba(102, 126, 234, 0.3)";
+                e.target.style.transform = "translateY(0) scale(1)";
+                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4), 0 5px 15px rgba(0, 0, 0, 0.1)";
               }}>
                 <span style={statNumber}>{stats.activeUsers}</span>
                 👥 Active Users
               </div>
               <div style={statCard} onMouseEnter={(e) => {
-                e.target.style.transform = "translateY(-5px)";
-                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4)";
+                e.target.style.transform = "translateY(-8px) scale(1.02)";
+                e.target.style.boxShadow = "0 25px 50px rgba(102, 126, 234, 0.5), 0 10px 25px rgba(0, 0, 0, 0.15)";
               }} onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0)";
-                e.target.style.boxShadow = "0 10px 25px rgba(102, 126, 234, 0.3)";
+                e.target.style.transform = "translateY(0) scale(1)";
+                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4), 0 5px 15px rgba(0, 0, 0, 0.1)";
               }}>
                 <span style={statNumber}>{stats.pendingReviews}</span>
                 ⏳ Pending Reviews
@@ -512,11 +571,11 @@ export default function Dashboard() {
               <div style={eventCardGrid}>
                 {displayEvents.map((event) => (
                   <div key={event._id} style={{...eventCard, cursor: "pointer"}} onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-8px)";
-                    e.currentTarget.style.boxShadow = "0 20px 40px rgba(0, 0, 0, 0.15)";
+                    e.currentTarget.style.transform = "translateY(-12px) scale(1.02)";
+                    e.currentTarget.style.boxShadow = "0 25px 60px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(0, 0, 0, 0.12)";
                   }} onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 10px 30px rgba(0, 0, 0, 0.1)";
+                    e.currentTarget.style.transform = "translateY(0) scale(1)";
+                    e.currentTarget.style.boxShadow = "0 15px 40px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.08)";
                   }} onClick={() => {
                     navigate(`/event-details/${event._id}`);
                   }}>
@@ -683,11 +742,28 @@ export default function Dashboard() {
                             }}>
                               {reg.status === "approved" ? "✅ Approved" : reg.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}
                             </div>
-                            {reg.status === "approved" && (
-                              <div style={{ marginTop: "15px" }}>
+                            <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+                              {reg.status === "approved" && (
                                 <TicketDownload event={reg.event} user={user} />
-                              </div>
-                            )}
+                              )}
+                              <button
+                                style={cancelBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCancelRegistration(event._id);
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.transform = "translateY(-2px)";
+                                  e.target.style.boxShadow = "0 6px 20px rgba(245, 101, 101, 0.4)";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.transform = "translateY(0)";
+                                  e.target.style.boxShadow = "0 4px 15px rgba(245, 101, 101, 0.3)";
+                                }}
+                              >
+                                ❌ Cancel Registration
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>

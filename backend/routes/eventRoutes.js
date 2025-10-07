@@ -57,6 +57,40 @@ router.post("/", authMiddleware, roleMiddleware(["college_admin"]), async (req, 
 });
 
 // =============================
+// 📌 Update Event (Admin Only)
+// =============================
+router.put("/:eventId", authMiddleware, roleMiddleware(["college_admin"]), async (req, res) => {
+  try {
+    const { title, description, category, location, startDate, endDate, college, onlineLink } = req.body;
+    
+    const event = await Event.findOne({ _id: req.params.eventId, collegeId: req.user.id });
+    if (!event) {
+      return res.status(404).json({ error: "Event not found or unauthorized" });
+    }
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      req.params.eventId,
+      {
+        title,
+        description,
+        category,
+        location,
+        startDate,
+        endDate,
+        college,
+        onlineLink,
+      },
+      { new: true }
+    );
+
+    res.json({ message: "✅ Event updated successfully!", event: updatedEvent });
+  } catch (err) {
+    console.error("❌ Event update error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================
 // 📌 Get Events Created by Admin
 // =============================
 router.get("/my-events", authMiddleware, roleMiddleware(["college_admin"]), async (req, res) => {

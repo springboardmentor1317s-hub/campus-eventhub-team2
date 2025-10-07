@@ -49,6 +49,31 @@ router.post(
   }
 );
 
+// ✅ Cancel registration for an event
+router.delete(
+  "/cancel-registration",
+  authMiddleware,
+  roleMiddleware(["student"]),
+  async (req, res) => {
+    try {
+      const { eventId } = req.body;
+
+      const registration = await Registration.findOneAndDelete({ 
+        student: req.user.id, 
+        event: eventId 
+      });
+
+      if (!registration) {
+        return res.status(404).json({ error: "Registration not found" });
+      }
+
+      res.json({ message: "Registration cancelled successfully" });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 // ✅ Get all events a student registered for (with status + notification)
 router.get(
   "/my-events",

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Select from "react-select";
 
 
@@ -22,21 +22,47 @@ export default function CreateEvent() {
     endDate: "",
     college: "",
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const [eventId, setEventId] = useState(null);
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (editId) {
+      setIsEditing(true);
+      setEventId(editId);
+      loadEventData(editId);
+    }
+  }, [searchParams]);
+
+  const loadEventData = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`http://localhost:5000/api/events/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const event = response.data;
+      setForm({
+        title: event.title || "",
+        description: event.description || "",
+        category: event.category || "Sports",
+        location: event.location || "",
+        startDate: event.startDate ? new Date(event.startDate).toISOString().slice(0, 16) : "",
+        endDate: event.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : "",
+        college: event.college || "",
+      });
+    } catch (err) {
+      console.error("Failed to load event data:", err);
+      alert("Failed to load event data");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-
-      // ✅ Auto map category -> image
-      const imageMap = {
-        Sports: "sports.events.jpg",
-        Hackathon: "hackathon.events.jpg",
-        Cultural: "cultural.events.jpg",
-        Workshop: "workshop.events.jpg",
-      };
 
       const eventData = {
         title: form.title,
@@ -50,19 +76,25 @@ export default function CreateEvent() {
 
       console.log("📤 Sending event data:", eventData);
 
-      const response = await axios.post("http://localhost:5000/api/events", eventData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      let response;
+      if (isEditing) {
+        response = await axios.put(`http://localhost:5000/api/events/${eventId}`, eventData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        alert("✅ Event updated successfully!");
+      } else {
+        response = await axios.post("http://localhost:5000/api/events", eventData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        alert("✅ Event created successfully!");
+      }
 
-      console.log("✅ Event created response:", response.data);
-
-      alert("✅ Event created successfully!");
-      // Force refresh by adding timestamp to trigger re-render
+      console.log("✅ Event response:", response.data);
       navigate("/dashboard", { replace: true });
       window.location.reload();
     } catch (err) {
-      console.error("Event creation error:", err.response || err);
-      alert(err.response?.data?.error || "❌ Failed to create event");
+      console.error("Event operation error:", err.response || err);
+      alert(err.response?.data?.error || `❌ Failed to ${isEditing ? 'update' : 'create'} event`);
     }
   };
 
@@ -89,7 +121,7 @@ export default function CreateEvent() {
         }}
       >
         <h2 style={{ marginBottom: "1.5rem", color: "#2c3e50" }}>
-          📅 Create New Event
+          {isEditing ? "✏️ Edit Event" : "📅 Create New Event"}
         </h2>
 
         <form onSubmit={handleSubmit}>
@@ -102,17 +134,17 @@ export default function CreateEvent() {
             style={inputStyle}
           />
 
-          {/* <textarea
-            placeholder="Event Description"
+          <textarea
+            placeholder="Event Description (About the Event - Min 20 words)"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             rows="3"
             style={inputStyle}
-          /> */}
+          />
 
           <input
             type="text"
-            placeholder="About the Event Mini 20 words"
+            placeholder="Event Location (e.g., Main Auditorium, Sports Complex)"
             value={form.location}
             onChange={(e) => setForm({ ...form, location: e.target.value })}
             style={inputStyle}
@@ -180,7 +212,7 @@ export default function CreateEvent() {
           </select>
 
           <button type="submit" style={buttonStyle}>
-            Create Event
+            {isEditing ? "Update Event" : "Create Event"}
           </button>
         </form>
       </div>
