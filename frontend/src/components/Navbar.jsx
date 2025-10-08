@@ -22,7 +22,10 @@ function Navbar() {
           <img
             src="/Event3.png"
             alt="Logo"
-            style={{ width: "135px", height: "60px" }}
+            style={{ 
+              width: window.innerWidth <= 768 ? "100px" : "135px", 
+              height: window.innerWidth <= 768 ? "45px" : "60px" 
+            }}
           />
         </div>
 
@@ -64,15 +67,16 @@ function Navbar() {
               {role === "student" && (
                 <button
                   style={{
-                    background: "#635bff",
+                    background: "transparent",
                     color: "white",
                     border: "none",
-                    padding: "8px 14px",
-                    borderRadius: "6px",
+                    padding: "10px 16px",
+                    borderRadius: "8px",
                     cursor: "pointer",
-                    fontWeight: "bold",
+                    fontWeight: "600",
                     fontSize: "0.95rem",
-                    marginRight: "8px"
+                    marginRight: "8px",
+                    transition: "all 0.3s ease",
                   }}
                   onClick={() => setShowFeedback(true)}
                 >
@@ -81,7 +85,7 @@ function Navbar() {
               )}
 
               {/* User greet */}
-              <div style={{ textAlign: "right", color: "white", fontSize: "1rem" }}>
+              <div style={{ textAlign: "right", color: "white", fontSize: window.innerWidth <= 768 ? "0.9rem" : "1rem" }}>
                 <div style={{ fontWeight: "bold" }}>👋 {name}</div>
               </div>
 
@@ -137,42 +141,54 @@ function Navbar() {
 
 // Styles
 const navbarStyle = {
-  padding: "1rem 2rem",
-  background: "#0996e6",
+  padding: window.innerWidth <= 768 ? "0.8rem 1rem" : "1rem 2rem",
+  background: "linear-gradient(to right, #6a11cb, #2575fc)",
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-  fontFamily: "Segoe UI, sans-serif",
+  boxShadow: "0 2px 20px rgba(0, 0, 0, 0.1)",
+  fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+  borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+  flexWrap: window.innerWidth <= 768 ? "wrap" : "nowrap",
 };
 const logoContainer = { display: "flex", alignItems: "center" };
-const navLinks = { display: "flex", alignItems: "center", gap: "1.5rem" };
+const navLinks = { 
+  display: "flex", 
+  alignItems: "center", 
+  gap: window.innerWidth <= 768 ? "0.5rem" : "1.5rem",
+  flexWrap: "wrap",
+};
 const linkStyle = {
   color: "white",
   textDecoration: "none",
   fontWeight: "600",
-  fontSize: "1.05rem",
+  fontSize: window.innerWidth <= 768 ? "0.9rem" : "1.05rem",
   transition: "all 0.3s ease",
+  padding: window.innerWidth <= 768 ? "6px 8px" : "8px 12px",
+  borderRadius: "6px",
+  whiteSpace: "nowrap",
 };
 const logoutBtn = {
   background: "#e74c3c",
   color: "white",
   border: "none",
-  padding: "8px 14px",
-  borderRadius: "6px",
+  padding: "10px 16px",
+  borderRadius: "8px",
   cursor: "pointer",
-  fontWeight: "bold",
+  fontWeight: "600",
   fontSize: "0.95rem",
-  transition: "background 0.3s ease",
+  transition: "all 0.3s ease",
+  boxShadow: "0 4px 12px rgba(231, 76, 60, 0.3)",
 };
 
 // Hover styles via CSS injection
 const style = document.createElement("style");
 style.innerHTML = `
   .nav-link:hover {
-    color: #dff6ff !important;
-    text-decoration:import FeedbackForm from './FeedbackForm';
- underline;
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #667eea !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   }
 `;
 document.head.appendChild(style);
