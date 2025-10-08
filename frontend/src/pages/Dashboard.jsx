@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [searchTitle, setSearchTitle] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+  const [registrationFilter, setRegistrationFilter] = useState("all");
   const [stats, setStats] = useState({
     totalEvents: 0,
     totalRegistrations: 0,
@@ -115,7 +116,19 @@ export default function Dashboard() {
     const matchesCategory = filterCategory === "all" || event.category.toLowerCase() === filterCategory.toLowerCase();
     const matchesTitle = searchTitle === "" || event.title.toLowerCase().includes(searchTitle.toLowerCase());
     const matchesLocation = searchLocation === "" || (event.location && event.location.toLowerCase().includes(searchLocation.toLowerCase()));
-    return matchesCategory && matchesTitle && matchesLocation;
+    
+    // Registration status filter for students
+    let matchesRegistration = true;
+    if (user?.role === "student" && registrationFilter !== "all") {
+      const isRegistered = registeredEvents.find((r) => r.event._id === event._id);
+      if (registrationFilter === "registered") {
+        matchesRegistration = !!isRegistered;
+      } else if (registrationFilter === "not-registered") {
+        matchesRegistration = !isRegistered;
+      }
+    }
+    
+    return matchesCategory && matchesTitle && matchesLocation && matchesRegistration;
   });
 
   const sortedEvents = [...filteredEvents].sort((a, b) => {
@@ -219,95 +232,100 @@ export default function Dashboard() {
 
   const containerOuter = {
     minHeight: "100vh",
-    width: "100vw",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+    width: "100%",
+    background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%)",
     display: "flex",
     justifyContent: "center",
-    padding: "20px 0",
+    padding: window.innerWidth <= 768 ? "10px" : "20px 0",
     position: "relative",
     overflow: "hidden",
   };
   const containerInner = {
     width: "100%",
-    maxWidth: "1500px",
+    maxWidth: window.innerWidth <= 768 ? "100%" : "1500px",
     margin: "0 auto",
     background: "rgba(255, 255, 255, 0.98)",
-    borderRadius: "24px",
+    borderRadius: window.innerWidth <= 768 ? "12px" : "24px",
     boxShadow: "0 30px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1)",
-    minHeight: "95vh",
-    padding: "50px",
+    minHeight: window.innerWidth <= 768 ? "auto" : "95vh",
+    padding: window.innerWidth <= 768 ? "20px" : "50px",
     display: "flex",
     flexDirection: "column",
     backdropFilter: "blur(20px)",
     position: "relative",
     border: "1px solid rgba(255, 255, 255, 0.2)",
   };
+  const headerContainer = {
+    background: "white",
+    padding: "20px 30px",
+    borderRadius: "12px",
+    marginBottom: "25px",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+    border: "1px solid rgba(226, 232, 240, 0.6)",
+  };
   const headerStyle = {
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    fontSize: "3.8rem",
-    fontWeight: "900",
-    marginBottom: "20px",
+    color: "#2d3748",
+    fontSize: "2.2rem",
+    fontWeight: "700",
+    marginBottom: "8px",
     textAlign: "center",
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-    letterSpacing: "-0.03em",
-    textShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    letterSpacing: "-0.02em",
   };
   const welcomeStyle = {
-    fontSize: "1.8rem",
-    color: "#2d3748",
+    fontSize: "1.1rem",
+    color: "#4a5568",
     textAlign: "center",
-    marginBottom: "45px",
-    fontWeight: "600",
+    marginBottom: "0",
+    fontWeight: "500",
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
     letterSpacing: "-0.01em",
-    opacity: "0.8",
   };
   const statsGrid = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "15px",
-    marginBottom: "30px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+    gap: "12px",
+    marginBottom: "25px",
   };
   const statCard = {
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+    background: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%)",
     color: "white",
-    padding: "20px 15px",
-    borderRadius: "16px",
+    padding: "15px 12px",
+    borderRadius: "12px",
     textAlign: "center",
     fontWeight: "600",
-    fontSize: "0.9rem",
-    boxShadow: "0 8px 20px rgba(102, 126, 234, 0.3), 0 3px 10px rgba(0, 0, 0, 0.1)",
+    fontSize: "0.8rem",
+    boxShadow: "0 6px 15px rgba(30, 58, 138, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1)",
     transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
     cursor: "pointer",
     position: "relative",
     overflow: "hidden",
   };
   const statNumber = {
-    fontSize: "2rem",
+    fontSize: "1.5rem",
     fontWeight: "700",
     display: "block",
-    marginBottom: "5px",
+    marginBottom: "4px",
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
   };
   const controlsContainer = {
     background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
-    padding: "30px",
+    padding: window.innerWidth <= 768 ? "15px" : "30px",
     borderRadius: "18px",
-    marginBottom: "40px",
+    marginBottom: window.innerWidth <= 768 ? "20px" : "40px",
     display: "flex",
-    gap: "25px",
+    gap: window.innerWidth <= 768 ? "8px" : "15px",
     alignItems: "center",
     flexWrap: "wrap",
     border: "1px solid rgba(226, 232, 240, 0.6)",
     boxShadow: "0 8px 25px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
     backdropFilter: "blur(10px)",
+    flexDirection: "row",
   };
   const eventCardGrid = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
-    gap: "25px",
+    gridTemplateColumns: window.innerWidth <= 768 ? "1fr" : "repeat(auto-fit, minmax(380px, 1fr))",
+    gap: window.innerWidth <= 768 ? "15px" : "25px",
   };
   const eventCard = {
     background: "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
@@ -419,15 +437,16 @@ export default function Dashboard() {
   };
 
   const selectStyle = {
-    padding: "12px 18px",
-    borderRadius: "12px",
+    padding: window.innerWidth <= 768 ? "8px 12px" : "10px 14px",
+    borderRadius: "8px",
     border: "2px solid rgba(226, 232, 240, 0.8)",
-    fontSize: "1rem",
+    fontSize: window.innerWidth <= 768 ? "0.8rem" : "0.9rem",
     color: "#2d3748",
     cursor: "pointer",
     background: "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
     transition: "all 0.3s ease",
-    minWidth: "180px",
+    minWidth: window.innerWidth <= 768 ? "120px" : "140px",
+    width: "auto",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
     fontWeight: "500",
   };
@@ -455,10 +474,12 @@ export default function Dashboard() {
   return (
     <div style={containerOuter}>
       <div style={containerInner}>
-        <h1 style={headerStyle}>
-          {user.role === "college_admin" ? "🎯 Admin Dashboard" : "🎓 Student Dashboard"}
-        </h1>
-        <h2 style={welcomeStyle}>Welcome back, {user.name}! 👋</h2>
+        <div style={headerContainer}>
+          <h1 style={headerStyle}>
+            {user.role === "college_admin" ? "🎯 Admin Dashboard" : "🎓 Student Dashboard"}
+          </h1>
+          <h2 style={welcomeStyle}>Welcome back, {user.name}! 👋</h2>
+        </div>
 
         {/* Admin Dashboard */}
         {user.role === "college_admin" && (
@@ -642,38 +663,32 @@ export default function Dashboard() {
         {user.role === "student" && (
           <>
             <div style={controlsContainer}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <label style={{ fontWeight: "600", color: "#4a5568" }}>📝 Title:</label>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568", fontSize: "0.9rem" }}>📝 Title:</label>
                 <input
                   type="text"
-                  placeholder="Search by title..."
+                  placeholder="Search..."
                   value={searchTitle}
                   onChange={(e) => setSearchTitle(e.target.value)}
-                  style={{
-                    ...selectStyle,
-                    minWidth: "200px"
-                  }}
+                  style={selectStyle}
                   onFocus={(e) => e.target.style.borderColor = "#667eea"}
                   onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
                 />
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <label style={{ fontWeight: "600", color: "#4a5568" }}>📍 Location:</label>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568", fontSize: "0.9rem" }}>📍 Location:</label>
                 <input
                   type="text"
-                  placeholder="Search by location..."
+                  placeholder="Location..."
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
-                  style={{
-                    ...selectStyle,
-                    minWidth: "200px"
-                  }}
+                  style={selectStyle}
                   onFocus={(e) => e.target.style.borderColor = "#667eea"}
                   onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
                 />
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <label style={{ fontWeight: "600", color: "#4a5568" }}>📊 Sort by:</label>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568", fontSize: "0.9rem" }}>📊 Sort:</label>
                 <select
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
@@ -681,12 +696,12 @@ export default function Dashboard() {
                   onFocus={(e) => e.target.style.borderColor = "#667eea"}
                   onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
                 >
-                  <option value="date">📅 Start Date</option>
-                  <option value="category">📂 Category (A-Z)</option>
+                  <option value="date">Date</option>
+                  <option value="category">Category</option>
                 </select>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <label style={{ fontWeight: "600", color: "#4a5568" }}>🎯 Filter by:</label>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568", fontSize: "0.9rem" }}>🎯 Filter:</label>
                 <select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
@@ -694,11 +709,25 @@ export default function Dashboard() {
                   onFocus={(e) => e.target.style.borderColor = "#667eea"}
                   onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
                 >
-                  <option value="all">🌟 All Categories</option>
-                  <option value="sports">⚽ Sports</option>
-                  <option value="hackathon">💻 Hackathon</option>
-                  <option value="cultural">🎭 Cultural</option>
-                  <option value="workshop">🛠️ Workshop</option>
+                  <option value="all">All</option>
+                  <option value="sports">Sports</option>
+                  <option value="hackathon">Hackathon</option>
+                  <option value="cultural">Cultural</option>
+                  <option value="workshop">Workshop</option>
+                </select>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568", fontSize: "0.9rem" }}>📋 Registration:</label>
+                <select
+                  value={registrationFilter}
+                  onChange={(e) => setRegistrationFilter(e.target.value)}
+                  style={selectStyle}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                >
+                  <option value="all">All</option>
+                  <option value="registered">Registered</option>
+                  <option value="not-registered">Not Registered</option>
                 </select>
               </div>
             </div>
