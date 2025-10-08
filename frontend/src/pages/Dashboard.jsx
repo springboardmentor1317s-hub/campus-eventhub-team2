@@ -14,6 +14,8 @@ export default function Dashboard() {
   const [justRegisteredId, setJustRegisteredId] = useState(null);
   const [sortOption, setSortOption] = useState("date");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [searchTitle, setSearchTitle] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
   const [stats, setStats] = useState({
     totalEvents: 0,
     totalRegistrations: 0,
@@ -22,8 +24,30 @@ export default function Dashboard() {
   });
   const [openCommentsId, setOpenCommentsId] = useState(null);
 
+
   const navigate = useNavigate();
   const API = "http://localhost:5000/api";
+
+  const loadEvents = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
+      
+      let endpoint = `${API}/events`; // Default for students
+      let headers = {};
+      
+      if (role === "college_admin") {
+        endpoint = `${API}/events/my-events`; // Admin gets only their events
+        headers = { Authorization: `Bearer ${token}` };
+      }
+      
+      const res = await axios.get(endpoint, { headers });
+      console.log("📅 Events loaded:", res.data);
+      setEvents(res.data);
+    } catch (err) {
+      console.error("❌ Failed to load events", err);
+    }
+  };
 
   useEffect(() => {
     const name = localStorage.getItem("name");
@@ -50,10 +74,7 @@ export default function Dashboard() {
       });
     }
 
-    axios
-      .get(`${API}/events`)
-      .then((res) => setEvents(res.data))
-      .catch((err) => console.error("Failed to load events", err));
+    loadEvents();
 
     if (role === "student" && token) {
       axios
@@ -78,14 +99,24 @@ export default function Dashboard() {
     };
   }, [navigate]);
 
+  // Refresh events when returning to dashboard
+  useEffect(() => {
+    const handleFocus = () => {
+      loadEvents();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
   if (!user) return <p style={{ textAlign: "center" }}>Loading...</p>;
 
-  const filteredEvents =
-    filterCategory === "all"
-      ? events
-      : events.filter(
-        (event) => event.category.toLowerCase() === filterCategory.toLowerCase()
-      );
+  const filteredEvents = events.filter((event) => {
+    const matchesCategory = filterCategory === "all" || event.category.toLowerCase() === filterCategory.toLowerCase();
+    const matchesTitle = searchTitle === "" || event.title.toLowerCase().includes(searchTitle.toLowerCase());
+    const matchesLocation = searchLocation === "" || (event.location && event.location.toLowerCase().includes(searchLocation.toLowerCase()));
+    return matchesCategory && matchesTitle && matchesLocation;
+  });
 
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     if (sortOption === "date") return new Date(a.startDate) - new Date(b.startDate);
@@ -125,6 +156,36 @@ export default function Dashboard() {
     }
   };
 
+  const handleCancelRegistration = async (eventId) => {
+    if (window.confirm("Are you sure you want to cancel your registration?")) {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API}/student/cancel-registration`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ eventId }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("✅ Registration cancelled successfully!");
+          axios
+            .get(`${API}/student/my-events`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((res) => setRegisteredEvents(res.data))
+            .catch((err) => console.error("Failed to refresh registered events", err));
+        } else {
+          alert(data.message || "Error cancelling registration");
+        }
+      } catch (err) {
+        alert("❌ Network error while cancelling registration");
+      }
+    }
+  };
+
   const handleDeleteEvent = async (eventId) => {
     const token = localStorage.getItem("token");
     if (window.confirm("Are you sure you want to delete this event?")) {
@@ -133,6 +194,7 @@ export default function Dashboard() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setEvents(events.filter((event) => event._id !== eventId));
+        await loadEvents(); // Refresh events after deletion
         alert("✅ Event deleted!");
       } catch (err) {
         alert("❌ Error deleting event");
@@ -158,162 +220,417 @@ export default function Dashboard() {
   const containerOuter = {
     minHeight: "100vh",
     width: "100vw",
-    background: "linear-gradient(120deg, #eaf6ff 60%, #d4edfb 100%)",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
     display: "flex",
     justifyContent: "center",
+    padding: "20px 0",
+    position: "relative",
+    overflow: "hidden",
   };
   const containerInner = {
     width: "100%",
-    maxWidth: "1600px",
+    maxWidth: "1500px",
     margin: "0 auto",
-    background: "#fff",
-    borderRadius: "16px",
-    boxShadow: "0 10px 30px rgba(33,77,109,0.07)",
-    minHeight: "88vh",
-    padding: "40px 36px",
+    background: "rgba(255, 255, 255, 0.98)",
+    borderRadius: "24px",
+    boxShadow: "0 30px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+    minHeight: "95vh",
+    padding: "50px",
     display: "flex",
     flexDirection: "column",
+    backdropFilter: "blur(20px)",
+    position: "relative",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+  };
+  const headerStyle = {
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    fontSize: "3.8rem",
+    fontWeight: "900",
+    marginBottom: "20px",
+    textAlign: "center",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+    letterSpacing: "-0.03em",
+    textShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+  };
+  const welcomeStyle = {
+    fontSize: "1.8rem",
+    color: "#2d3748",
+    textAlign: "center",
+    marginBottom: "45px",
+    fontWeight: "600",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+    letterSpacing: "-0.01em",
+    opacity: "0.8",
   };
   const statsGrid = {
-    background: "#fff",
-    padding: "10px",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    display: "flex",
-    gap: "25px",
-    justifyContent: "center",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "15px",
+    marginBottom: "30px",
   };
   const statCard = {
-    background: "linear-gradient(90deg, #0996e6, #29c2ee)",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
     color: "white",
-    padding: "1.1rem",
-    borderRadius: "13px",
+    padding: "20px 15px",
+    borderRadius: "16px",
     textAlign: "center",
-    fontWeight: "bold",
-    fontSize: "1.15rem",
-    boxShadow: "0 8px 24px #c2e7fa",
-    letterSpacing: "1px",
+    fontWeight: "600",
+    fontSize: "0.9rem",
+    boxShadow: "0 8px 20px rgba(102, 126, 234, 0.3), 0 3px 10px rgba(0, 0, 0, 0.1)",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    cursor: "pointer",
+    position: "relative",
+    overflow: "hidden",
+  };
+  const statNumber = {
+    fontSize: "2rem",
+    fontWeight: "700",
+    display: "block",
+    marginBottom: "5px",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+  };
+  const controlsContainer = {
+    background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
+    padding: "30px",
+    borderRadius: "18px",
+    marginBottom: "40px",
+    display: "flex",
+    gap: "25px",
+    alignItems: "center",
+    flexWrap: "wrap",
+    border: "1px solid rgba(226, 232, 240, 0.6)",
+    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
+    backdropFilter: "blur(10px)",
   };
   const eventCardGrid = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(350px,1fr))",
-    gap: "36px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
+    gap: "25px",
   };
   const eventCard = {
-    background: "#ffffff",
-    borderRadius: "17px",
-    boxShadow: "0 6px 34px 0px #bacee0",
-    padding: "2rem 1.3rem 1.2rem 1.3rem",
+    background: "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
+    borderRadius: "24px",
+    boxShadow: "0 15px 40px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.08)",
+    padding: "0",
     position: "relative",
+    overflow: "hidden",
+    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    border: "1px solid rgba(226, 232, 240, 0.6)",
+  };
+  const eventCardContent = {
+    padding: "25px",
+  };
+  const eventTitle = {
+    fontSize: "1.6rem",
+    fontWeight: "700",
+    color: "#2d3748",
+    marginBottom: "10px",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+    letterSpacing: "-0.01em",
+    lineHeight: "1.3",
+  };
+  const eventCategory = {
+    display: "inline-block",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "white",
+    padding: "6px 16px",
+    borderRadius: "20px",
+    fontSize: "0.95rem",
+    fontWeight: "600",
+    marginBottom: "15px",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+    letterSpacing: "0.02em",
+  };
+  const eventDate = {
+    color: "#718096",
+    fontSize: "1.05rem",
+    marginBottom: "20px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontWeight: "500",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
   };
   const registerBtn = {
-    marginTop: "18px",
-    padding: "10px 28px",
-    background: "linear-gradient(90deg, #0996e6, #29c2ee)",
+    padding: "14px 28px",
+    background: "linear-gradient(135deg, #48bb78 0%, #38a169 100%)",
     color: "white",
-    fontWeight: 600,
+    fontWeight: "600",
     border: "none",
-    borderRadius: "9px",
-    fontSize: "1.07rem",
+    borderRadius: "12px",
+    fontSize: "1rem",
     cursor: "pointer",
-    boxShadow: "0 2px 7px #cde8fa",
-    alignSelf: "start",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    boxShadow: "0 6px 20px rgba(72, 187, 120, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1)",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
   };
-  const registeredBtn = {
-    ...registerBtn,
-    background: "gray",
-    cursor: "not-allowed",
+  const commentsBtn = {
+    padding: "14px 28px",
+    background: "linear-gradient(145deg, #f7fafc 0%, #ffffff 100%)",
+    color: "#4a5568",
+    fontWeight: "600",
+    border: "2px solid rgba(226, 232, 240, 0.8)",
+    borderRadius: "12px",
+    fontSize: "1rem",
+    cursor: "pointer",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+  };
+  const cancelBtn = {
+    padding: "12px 24px",
+    background: "linear-gradient(135deg, #f56565 0%, #e53e3e 100%)",
+    color: "white",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "10px",
+    fontSize: "1rem",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 4px 15px rgba(245, 101, 101, 0.3)",
   };
   const deleteBtn = {
-    marginTop: "14px",
-    padding: "10px 28px",
-    background: "#e74c3c",
+    padding: "14px 28px",
+    background: "linear-gradient(135deg, #f56565 0%, #e53e3e 100%)",
     color: "white",
-    fontWeight: 600,
+    fontWeight: "600",
     border: "none",
-    borderRadius: "9px",
-    fontSize: "1.07rem",
-    cursor: "pointer",
-    boxShadow: "0 2px 7px #eec2cc",
-    alignSelf: "start",
-  };
-  const selectStyle = {
-    padding: "8px 12px",
-    borderRadius: "6px",
-    border: "1px solid #0996e6",
+    borderRadius: "12px",
     fontSize: "1rem",
-    color: "#14476f",
     cursor: "pointer",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    boxShadow: "0 6px 20px rgba(245, 101, 101, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1)",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
   };
+  const editBtn = {
+    padding: "14px 28px",
+    background: "linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)",
+    color: "white",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "12px",
+    fontSize: "1rem",
+    cursor: "pointer",
+    transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    boxShadow: "0 6px 20px rgba(237, 137, 54, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1)",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+  };
+
+  const selectStyle = {
+    padding: "12px 18px",
+    borderRadius: "12px",
+    border: "2px solid rgba(226, 232, 240, 0.8)",
+    fontSize: "1rem",
+    color: "#2d3748",
+    cursor: "pointer",
+    background: "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
+    transition: "all 0.3s ease",
+    minWidth: "180px",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+    fontWeight: "500",
+  };
+  const sectionTitle = {
+    fontSize: "2.2rem",
+    fontWeight: "700",
+    color: "#2d3748",
+    marginBottom: "30px",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+    letterSpacing: "-0.02em",
+  };
+  const statusBadge = {
+    padding: "6px 12px",
+    borderRadius: "20px",
+    fontSize: "0.85rem",
+    fontWeight: "600",
+    display: "inline-block",
+    marginTop: "10px",
+  };
+
 
   return (
     <div style={containerOuter}>
       <div style={containerInner}>
-        <h1>
-          📊 {user.role === "college_admin" ? "Admin Dashboard" : "Student Dashboard"}
+        <h1 style={headerStyle}>
+          {user.role === "college_admin" ? "🎯 Admin Dashboard" : "🎓 Student Dashboard"}
         </h1>
-        <h2>Welcome, {user.name}!</h2>
+        <h2 style={welcomeStyle}>Welcome back, {user.name}! 👋</h2>
 
         {/* Admin Dashboard */}
         {user.role === "college_admin" && (
           <>
             <div style={statsGrid}>
-              <div style={statCard}>📅 Total Events: {stats.totalEvents}</div>
-              <div style={statCard}>📝 Registrations: {stats.totalRegistrations}</div>
-              <div style={statCard}>👥 Active Users: {stats.activeUsers}</div>
-              <div style={statCard}>⏳ Pending Reviews: {stats.pendingReviews}</div>
+              <div style={statCard} onMouseEnter={(e) => {
+                e.target.style.transform = "translateY(-8px) scale(1.02)";
+                e.target.style.boxShadow = "0 25px 50px rgba(102, 126, 234, 0.5), 0 10px 25px rgba(0, 0, 0, 0.15)";
+              }} onMouseLeave={(e) => {
+                e.target.style.transform = "translateY(0) scale(1)";
+                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4), 0 5px 15px rgba(0, 0, 0, 0.1)";
+              }}>
+                <span style={statNumber}>{stats.totalEvents}</span>
+                📅 Total Events
+              </div>
+              <div style={statCard} onMouseEnter={(e) => {
+                e.target.style.transform = "translateY(-8px) scale(1.02)";
+                e.target.style.boxShadow = "0 25px 50px rgba(102, 126, 234, 0.5), 0 10px 25px rgba(0, 0, 0, 0.15)";
+              }} onMouseLeave={(e) => {
+                e.target.style.transform = "translateY(0) scale(1)";
+                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4), 0 5px 15px rgba(0, 0, 0, 0.1)";
+              }}>
+                <span style={statNumber}>{stats.totalRegistrations}</span>
+                📝 Total Registrations
+              </div>
+              <div style={statCard} onMouseEnter={(e) => {
+                e.target.style.transform = "translateY(-8px) scale(1.02)";
+                e.target.style.boxShadow = "0 25px 50px rgba(102, 126, 234, 0.5), 0 10px 25px rgba(0, 0, 0, 0.15)";
+              }} onMouseLeave={(e) => {
+                e.target.style.transform = "translateY(0) scale(1)";
+                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4), 0 5px 15px rgba(0, 0, 0, 0.1)";
+              }}>
+                <span style={statNumber}>{stats.activeUsers}</span>
+                👥 Active Users
+              </div>
+              <div style={statCard} onMouseEnter={(e) => {
+                e.target.style.transform = "translateY(-8px) scale(1.02)";
+                e.target.style.boxShadow = "0 25px 50px rgba(102, 126, 234, 0.5), 0 10px 25px rgba(0, 0, 0, 0.15)";
+              }} onMouseLeave={(e) => {
+                e.target.style.transform = "translateY(0) scale(1)";
+                e.target.style.boxShadow = "0 15px 35px rgba(102, 126, 234, 0.4), 0 5px 15px rgba(0, 0, 0, 0.1)";
+              }}>
+                <span style={statNumber}>{stats.pendingReviews}</span>
+                ⏳ Pending Reviews
+              </div>
             </div>
-            <div style={{ margin: "1.5rem 0", fontWeight: 500, color: "#0996e6" }}>
-              <label style={{ marginRight: "12px" }}>Sort by:</label>
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                style={selectStyle}
-              >
-                <option value="date">Start Date</option>
-                <option value="category">Category (A-Z)</option>
-              </select>
-              <label style={{ margin: "0 12px" }}>Filter by:</label>
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                style={selectStyle}
-              >
-                <option value="all">All</option>
-                <option value="sports">Sports</option>
-                <option value="hackathon">Hackathon</option>
-                <option value="cultural">Cultural</option>
-                <option value="workshop">Workshop</option>
-              </select>
+            <div style={controlsContainer}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📝 Title:</label>
+                <input
+                  type="text"
+                  placeholder="Search by title..."
+                  value={searchTitle}
+                  onChange={(e) => setSearchTitle(e.target.value)}
+                  style={{
+                    ...selectStyle,
+                    minWidth: "200px"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📍 Location:</label>
+                <input
+                  type="text"
+                  placeholder="Search by location..."
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                  style={{
+                    ...selectStyle,
+                    minWidth: "200px"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📊 Sort by:</label>
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  style={selectStyle}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                >
+                  <option value="date">📅 Start Date</option>
+                  <option value="category">📂 Category (A-Z)</option>
+                </select>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>🎯 Filter by:</label>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  style={selectStyle}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                >
+                  <option value="all">🌟 All Categories</option>
+                  <option value="sports">⚽ Sports</option>
+                  <option value="hackathon">💻 Hackathon</option>
+                  <option value="cultural">🎭 Cultural</option>
+                  <option value="workshop">🛠️ Workshop</option>
+                </select>
+              </div>
             </div>
             <section>
-              <h3 style={{ margin: "20px 0" }}>Upcoming Events</h3>
+              <h3 style={sectionTitle}>🎪 Upcoming Events</h3>
               <div style={eventCardGrid}>
                 {displayEvents.map((event) => (
-                  <div key={event._id} style={eventCard}>
+                  <div key={event._id} style={{...eventCard, cursor: "pointer"}} onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-12px) scale(1.02)";
+                    e.currentTarget.style.boxShadow = "0 25px 60px rgba(0, 0, 0, 0.2), 0 10px 30px rgba(0, 0, 0, 0.12)";
+                  }} onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0) scale(1)";
+                    e.currentTarget.style.boxShadow = "0 15px 40px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.08)";
+                  }} onClick={() => {
+                    navigate(`/event-details/${event._id}`);
+                  }}>
                     <img
                       src={getEventImage(event.category)}
                       alt={event.category}
                       style={{
                         width: "100%",
-                        height: "150px",
+                        height: "200px",
                         objectFit: "cover",
-                        borderRadius: "10px",
-                        marginBottom: "12px",
                       }}
                     />
-                    <h4>{event.title}</h4>
-                    <p>{event.category}</p>
-                    <p>
-                      {new Date(event.startDate).toLocaleDateString()} -{" "}
-                      {new Date(event.endDate).toLocaleDateString()}
-                    </p>
-                    <button
-                      style={deleteBtn}
-                      onClick={() => handleDeleteEvent(event._id)}
-                    >
-                      Delete Event
-                    </button>
+                    <div style={eventCardContent}>
+                      <h4 style={eventTitle}>{event.title}</h4>
+                      <span style={eventCategory}>{event.category}</span>
+                      <p style={eventDate}>
+                        📅 {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
+                      </p>
+                      <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+                        <button
+                          style={editBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/create-event?edit=${event._id}`);
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = "translateY(-2px)";
+                            e.target.style.boxShadow = "0 6px 20px rgba(237, 137, 54, 0.4)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = "translateY(0)";
+                            e.target.style.boxShadow = "0 4px 15px rgba(237, 137, 54, 0.3)";
+                          }}
+                        >
+                          ✏️ Edit Event
+                        </button>
+                        <button
+                          style={deleteBtn}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteEvent(event._id);
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = "translateY(-2px)";
+                            e.target.style.boxShadow = "0 6px 20px rgba(245, 101, 101, 0.4)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = "translateY(0)";
+                            e.target.style.boxShadow = "0 4px 15px rgba(245, 101, 101, 0.3)";
+                          }}
+                        >
+                          🗑️ Delete Event
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -324,135 +641,223 @@ export default function Dashboard() {
         {/* Student Dashboard */}
         {user.role === "student" && (
           <>
-            <div style={{ margin: "1.5rem 0", fontWeight: 500, color: "#0996e6" }}>
-              <label style={{ marginRight: "12px" }}>Sort by:</label>
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                style={selectStyle}
-              >
-                <option value="date">Start Date</option>
-                <option value="category">Category (A-Z)</option>
-              </select>
-              <label style={{ margin: "0 12px" }}>Filter by:</label>
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                style={selectStyle}
-              >
-                <option value="all">All</option>
-                <option value="sports">Sports</option>
-                <option value="hackathon">Hackathon</option>
-                <option value="cultural">Cultural</option>
-                <option value="workshop">Workshop</option>
-              </select>
+            <div style={controlsContainer}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📝 Title:</label>
+                <input
+                  type="text"
+                  placeholder="Search by title..."
+                  value={searchTitle}
+                  onChange={(e) => setSearchTitle(e.target.value)}
+                  style={{
+                    ...selectStyle,
+                    minWidth: "200px"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📍 Location:</label>
+                <input
+                  type="text"
+                  placeholder="Search by location..."
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                  style={{
+                    ...selectStyle,
+                    minWidth: "200px"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>📊 Sort by:</label>
+                <select
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                  style={selectStyle}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                >
+                  <option value="date">📅 Start Date</option>
+                  <option value="category">📂 Category (A-Z)</option>
+                </select>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label style={{ fontWeight: "600", color: "#4a5568" }}>🎯 Filter by:</label>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  style={selectStyle}
+                  onFocus={(e) => e.target.style.borderColor = "#667eea"}
+                  onBlur={(e) => e.target.style.borderColor = "#e2e8f0"}
+                >
+                  <option value="all">🌟 All Categories</option>
+                  <option value="sports">⚽ Sports</option>
+                  <option value="hackathon">💻 Hackathon</option>
+                  <option value="cultural">🎭 Cultural</option>
+                  <option value="workshop">🛠️ Workshop</option>
+                </select>
+              </div>
             </div>
             {/* Available Events: Comments Button SHOWN */}
             <section>
-              <h3 style={{ marginBottom: "20px" }}>Available Events</h3>
+              <h3 style={sectionTitle}>🎪 Available Events</h3>
               <div style={eventCardGrid}>
                 {displayEvents.map((event) => {
                   const reg = registeredEvents.find((r) => r.event._id === event._id);
                   return (
-                    <div key={event._id} style={eventCard}>
+                    <div key={event._id} style={{...eventCard, cursor: "pointer"}} onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-8px)";
+                      e.currentTarget.style.boxShadow = "0 20px 40px rgba(0, 0, 0, 0.15)";
+                    }} onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "0 10px 30px rgba(0, 0, 0, 0.1)";
+                    }} onClick={() => {
+                      navigate(`/event-details/${event._id}`);
+                    }}>
                       <img
                         src={getEventImage(event.category)}
                         alt={event.category}
                         style={{
                           width: "100%",
-                          height: "150px",
+                          height: "200px",
                           objectFit: "cover",
-                          borderRadius: "10px",
-                          marginBottom: "12px",
                         }}
                       />
-                      <h4>{event.title}</h4>
-                      <p>{event.category}</p>
-                      <p>
-                        {new Date(event.startDate).toLocaleDateString()} -{" "}
-                        {new Date(event.endDate).toLocaleDateString()}
-                      </p>
-                      {reg ? (
-                        <div>
-                          <p>
-                            Status:{" "}
-                            {reg.status === "approved" ? (
-                              <span style={{ color: "green" }}>Approved ✅</span>
-                            ) : reg.status === "rejected" ? (
-                              <span style={{ color: "red" }}>Rejected ❌</span>
-                            ) : (
-                              <span style={{ color: "orange" }}>Pending ⏳</span>
-                            )}
-                          </p>
-                          {reg.status === "approved" && (
-                            <TicketDownload event={reg.event} user={user} />
-                          )}
-                        </div>
-                      ) : (
-                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px" }}>
-                          <button
-                            style={registerBtn}
-                            onClick={() => handleRegister(event._id)}
-                          >
-                            Register
-                          </button>
-                          <button
-                            style={{
-                              marginTop: "18px",
-                              padding: "10px 28px",
-                              background: "#eee",
-                              color: "#14476f",
-                              fontWeight: 600,
-                              border: "1px solid #0996e6",
-                              borderRadius: "9px",
-                              fontSize: "1.07rem",
-                              cursor: "pointer",
-                              boxShadow: "0 2px 7px #cde8fa",
-                              alignSelf: "start",
-                            }}
-                            onClick={() =>
-                              setOpenCommentsId(openCommentsId === event._id ? null : event._id)
-                            }
-                          >
-                            {openCommentsId === event._id ? "Hide Comments" : "Comments"}
-                          </button>
-                        </div>
-                      )}
-                      {openCommentsId === event._id && (
-                        <CommentsSection eventId={event._id} />
-                      )}
+                      <div style={eventCardContent}>
+                        <h4 style={eventTitle}>{event.title}</h4>
+                        <span style={eventCategory}>{event.category}</span>
+                        <p style={eventDate}>
+                          📅 {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
+                        </p>
+                        {reg ? (
+                          <div>
+                            <div style={{
+                              ...statusBadge,
+                              background: reg.status === "approved" ? "#48bb78" : reg.status === "rejected" ? "#f56565" : "#ed8936",
+                              color: "white"
+                            }}>
+                              {reg.status === "approved" ? "✅ Approved" : reg.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}
+                            </div>
+                            <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+                              {reg.status === "approved" && (
+                                <TicketDownload event={reg.event} user={user} />
+                              )}
+                              <button
+                                style={cancelBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCancelRegistration(event._id);
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.transform = "translateY(-2px)";
+                                  e.target.style.boxShadow = "0 6px 20px rgba(245, 101, 101, 0.4)";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.transform = "translateY(0)";
+                                  e.target.style.boxShadow = "0 4px 15px rgba(245, 101, 101, 0.3)";
+                                }}
+                              >
+                                ❌ Cancel Registration
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+                            <button
+                              style={registerBtn}
+                              onClick={() => handleRegister(event._id)}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = "translateY(-2px)";
+                                e.target.style.boxShadow = "0 6px 20px rgba(72, 187, 120, 0.4)";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = "translateY(0)";
+                                e.target.style.boxShadow = "0 4px 15px rgba(72, 187, 120, 0.3)";
+                              }}
+                            >
+                              ✨ Register
+                            </button>
+                            <button
+                              style={commentsBtn}
+                              onClick={() =>
+                                setOpenCommentsId(openCommentsId === event._id ? null : event._id)
+                              }
+                              onMouseEnter={(e) => {
+                                e.target.style.borderColor = "#667eea";
+                                e.target.style.color = "#667eea";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.borderColor = "#e2e8f0";
+                                e.target.style.color = "#4a5568";
+                              }}
+                            >
+                              {openCommentsId === event._id ? "🔼 Hide" : "💬 Comments"}
+                            </button>
+                          </div>
+                        )}
+                        {openCommentsId === event._id && (
+                          <div style={{ marginTop: "20px", borderTop: "1px solid #e2e8f0", paddingTop: "20px" }}>
+                            <CommentsSection eventId={event._id} />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
               </div>
             </section>
             {/* Registered Events: Comments Button/box NOT SHOWN */}
-            <section style={{ marginTop: "2rem" }}>
-              <h3>Your Registered Events</h3>
+            <section style={{ marginTop: "40px" }}>
+              <h3 style={sectionTitle}>🎫 Your Registered Events</h3>
               <div style={eventCardGrid}>
                 {registeredEvents.map((reg) => (
-                  <div key={reg._id} style={eventCard}>
-                    <h4>{reg.event.title}</h4>
-                    <p>
-                      Status:{" "}
-                      {reg.status === "approved" ? (
-                        <span style={{ color: "green" }}>Approved ✅</span>
-                      ) : reg.status === "rejected" ? (
-                        <span style={{ color: "red" }}>Rejected ❌</span>
-                      ) : (
-                        <span style={{ color: "orange" }}>Pending ⏳</span>
+                  <div key={reg._id} style={eventCard} onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-8px)";
+                    e.currentTarget.style.boxShadow = "0 20px 40px rgba(0, 0, 0, 0.15)";
+                  }} onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 10px 30px rgba(0, 0, 0, 0.1)";
+                  }}>
+                    <img
+                      src={getEventImage(reg.event.category)}
+                      alt={reg.event.category}
+                      style={{
+                        width: "100%",
+                        height: "200px",
+                        objectFit: "cover",
+                      }}
+                    />
+                    <div style={eventCardContent}>
+                      <h4 style={eventTitle}>{reg.event.title}</h4>
+                      <span style={eventCategory}>{reg.event.category}</span>
+                      <p style={eventDate}>
+                        📅 {new Date(reg.event.startDate).toLocaleDateString()} - {new Date(reg.event.endDate).toLocaleDateString()}
+                      </p>
+                      <div style={{
+                        ...statusBadge,
+                        background: reg.status === "approved" ? "#48bb78" : reg.status === "rejected" ? "#f56565" : "#ed8936",
+                        color: "white"
+                      }}>
+                        {reg.status === "approved" ? "✅ Approved" : reg.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}
+                      </div>
+                      {reg.status === "approved" && (
+                        <div style={{ marginTop: "15px" }}>
+                          <TicketDownload event={reg.event} user={user} />
+                        </div>
                       )}
-                    </p>
-                    {reg.status === "approved" && (
-                      <TicketDownload event={reg.event} user={user} />
-                    )}
-                    {/* Comments Button NOT SHOWN in registered section */}
+                    </div>
                   </div>
                 ))}
               </div>
             </section>
           </>
         )}
+        
+
       </div>
     </div>
   );
