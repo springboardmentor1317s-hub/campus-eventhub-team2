@@ -24,7 +24,7 @@ export default function Dashboard() {
     pendingReviews: 0,
   });
   const [openCommentsId, setOpenCommentsId] = useState(null);
-
+  const [eventStats, setEventStats] = useState([]);
 
   const navigate = useNavigate();
   const API = "http://localhost:5000/api";
@@ -93,6 +93,15 @@ export default function Dashboard() {
         })
         .then((res) => setStats(res.data))
         .catch((err) => console.error("Failed to load stats", err));
+    }
+
+    if (role === "superadmin") {
+      axios
+        .get(`${API}/superadmin/event-stats`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => setEventStats(res.data))
+        .catch((err) => console.error("Failed to load event stats", err));
     }
 
     return () => {
@@ -476,10 +485,101 @@ export default function Dashboard() {
       <div style={containerInner}>
         <div style={headerContainer}>
           <h1 style={headerStyle}>
-            {user.role === "college_admin" ? "🎯 Admin Dashboard" : "🎓 Student Dashboard"}
+            {user.role === "college_admin" ? "🎯 Admin Dashboard" : 
+             user.role === "superadmin" ? "🔧 Superadmin Dashboard" : "🎓 Student Dashboard"}
           </h1>
           <h2 style={welcomeStyle}>Welcome back, {user.name}! 👋</h2>
         </div>
+
+        {/* Superadmin Dashboard */}
+        {user.role === "superadmin" && (
+          <>
+            <div style={{ textAlign: "center", marginBottom: "30px" }}>
+              <h2 style={{ color: "#4a5568", marginBottom: "10px" }}>Welcome back, Super! 👋</h2>
+              <p style={{ color: "#718096" }}>Here's an overview of event activity across all colleges.</p>
+            </div>
+            
+            {/* Event Statistics Graph */}
+            <div style={{
+              background: "white",
+              borderRadius: "12px",
+              padding: "30px",
+              marginBottom: "30px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+              border: "1px solid rgba(226, 232, 240, 0.6)"
+            }}>
+              <h2 style={{ marginBottom: "25px", color: "#2d3748", fontSize: "1.8rem" }}>📈 Events by College</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                {eventStats.map((stat, index) => {
+                  const maxCount = Math.max(...eventStats.map(s => s.eventCount));
+                  const barWidth = maxCount > 0 ? (stat.eventCount / maxCount) * 100 : 0;
+                  return (
+                    <div key={index} style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "20px",
+                      padding: "15px",
+                      background: "linear-gradient(145deg, #f8fafc 0%, #ffffff 100%)",
+                      borderRadius: "12px",
+                      border: "1px solid #e2e8f0",
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)"
+                    }}>
+                      <div style={{ minWidth: "180px", fontWeight: "700", color: "#2d3748", fontSize: "1.1rem" }}>
+                        {stat._id}
+                      </div>
+                      <div style={{ flex: 1, position: "relative" }}>
+                        <div style={{
+                          height: "35px",
+                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                          borderRadius: "18px",
+                          width: `${barWidth}%`,
+                          minWidth: "30px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "white",
+                          fontSize: "1rem",
+                          fontWeight: "700",
+                          boxShadow: "0 4px 15px rgba(102, 126, 234, 0.3)"
+                        }}>
+                          {stat.eventCount} events
+                        </div>
+                      </div>
+                      <div style={{ fontSize: "0.9rem", color: "#718096", fontWeight: "500" }}>
+                        by {stat.adminName}
+                      </div>
+                    </div>
+                  );
+                })}
+                {eventStats.length === 0 && (
+                  <div style={{ textAlign: "center", padding: "40px" }}>
+                    <p style={{ color: "#718096", fontSize: "1.1rem" }}>No event data available yet</p>
+                    <p style={{ color: "#a0aec0", fontSize: "0.9rem" }}>Events will appear here once college admins start creating them</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div style={{ textAlign: "center" }}>
+              <button
+                onClick={() => navigate("/superadmin-dashboard")}
+                style={{
+                  padding: "15px 30px",
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontSize: "1.1rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  boxShadow: "0 6px 20px rgba(102, 126, 234, 0.4)"
+                }}
+              >
+                🚀 Go to Superadmin Management
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Admin Dashboard */}
         {user.role === "college_admin" && (
@@ -615,6 +715,10 @@ export default function Dashboard() {
                       <p style={eventDate}>
                         📅 {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
                       </p>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                        <span style={{ fontSize: "1.2rem" }}>⭐</span>
+                        <span style={{ color: "#4a5568", fontWeight: "600" }}>Rating will load...</span>
+                      </div>
                       <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
                         <button
                           style={editBtn}
