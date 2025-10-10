@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import CommentsSection from "../components/CommentsSection";
 
 export default function EventDetails() {
   const { eventId } = useParams();
@@ -8,6 +9,8 @@ export default function EventDetails() {
   const [event, setEvent] = useState(null);
   const [user, setUser] = useState(null);
   const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [userRating, setUserRating] = useState(0);
+  const [eventRatings, setEventRatings] = useState({ averageRating: 0, totalRatings: 0 });
   const API = "http://localhost:5000/api";
 
   useEffect(() => {
@@ -28,6 +31,11 @@ export default function EventDetails() {
     axios.get(`${API}/events/${eventId}`)
       .then(res => setEvent(res.data))
       .catch(err => console.error("Failed to load event", err));
+    
+    // Load event ratings
+    axios.get(`${API}/events/${eventId}/ratings`)
+      .then(res => setEventRatings(res.data))
+      .catch(err => console.error("Failed to load ratings", err));
 
     // Load registered events for students
     if (role === "student" && token) {
@@ -64,6 +72,22 @@ export default function EventDetails() {
       }
     } catch (err) {
       alert("❌ Network error while registering");
+    }
+  };
+
+  const handleRating = async (rating) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(`${API}/events/${eventId}/rate`, { rating }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUserRating(rating);
+      // Refresh ratings
+      const res = await axios.get(`${API}/events/${eventId}/ratings`);
+      setEventRatings(res.data);
+      alert("✅ Rating submitted!");
+    } catch (err) {
+      alert("❌ Failed to submit rating");
     }
   };
 
@@ -219,6 +243,46 @@ export default function EventDetails() {
             </div>
           )}
           
+          {/* Event Rating */}
+          <div style={sectionStyle}>
+            <h3 style={sectionTitleStyle}>⭐ Event Rating</h3>
+            <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px" }}>
+              <div style={{ fontSize: "1.5rem" }}>
+                {"⭐".repeat(Math.floor(eventRatings.averageRating))}
+                {eventRatings.averageRating % 1 >= 0.5 ? "⭐" : ""}
+              </div>
+              <span style={{ fontSize: "1.2rem", fontWeight: "600", color: "#4a5568" }}>
+                {eventRatings.averageRating.toFixed(1)} ({eventRatings.totalRatings} ratings)
+              </span>
+            </div>
+            
+            {user.role === "student" && (
+              <div>
+                <p style={{ ...textStyle, marginBottom: "10px" }}>Rate this event:</p>
+                <div style={{ display: "flex", gap: "5px" }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => handleRating(star)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        fontSize: "1.5rem",
+                        cursor: "pointer",
+                        color: star <= userRating ? "#ffd700" : "#ddd",
+                        transition: "color 0.2s"
+                      }}
+                      onMouseEnter={(e) => e.target.style.color = "#ffd700"}
+                      onMouseLeave={(e) => e.target.style.color = star <= userRating ? "#ffd700" : "#ddd"}
+                    >
+                      ⭐
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          
           <div style={{ marginTop: "40px", display: "flex", alignItems: "center" }}>
             {user.role === "student" && !isRegistered && (
               <button style={buttonStyle} onClick={handleRegister}>
@@ -241,6 +305,12 @@ export default function EventDetails() {
             <button style={backButtonStyle} onClick={() => navigate("/dashboard")}>
               ← Back to Dashboard
             </button>
+          </div>
+          
+          {/* Comments Section */}
+          <div style={{ marginTop: "40px", borderTop: "2px solid #e2e8f0", paddingTop: "30px" }}>
+            <h3 style={sectionTitleStyle}>💬 Comments & Discussion</h3>
+            <CommentsSection eventId={eventId} />
           </div>
         </div>
       </div>

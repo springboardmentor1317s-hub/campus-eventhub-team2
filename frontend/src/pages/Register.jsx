@@ -26,10 +26,13 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/api/auth/register", form);
+      console.log("Submitting form:", form);
+      const response = await axios.post("/api/auth/register", form);
+      console.log("Registration response:", response.data);
       alert("✅ Registration successful!");
       navigate("/login");
     } catch (err) {
+      console.error("Registration error:", err.response?.data || err.message);
       alert(err.response?.data?.error || "❌ Registration failed");
     }
   };
@@ -204,6 +207,7 @@ export default function Register() {
                 >
                   <option value="student">Student</option>
                   <option value="college_admin">College Admin</option>
+                  <option value="superadmin">Superadmin</option>
                 </select>
               </div>
 

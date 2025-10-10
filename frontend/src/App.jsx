@@ -14,6 +14,7 @@ import CreateEvent from "./pages/CreateEvent";
 import EventList from "./pages/EventList";
 import EventDetails from "./pages/EventDetails";
 import Registrations from "./pages/Registrations"; // Admin Registrations
+import SuperadminDashboard from "./pages/SuperadminDashboard";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -114,6 +115,16 @@ function App() {
               element={
                 <ProtectedRoute role="college_admin">
                   <Registrations />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Superadmin Dashboard */}
+            <Route
+              path="/superadmin"
+              element={
+                <ProtectedRoute role="superadmin">
+                  <SuperadminDashboard />
                 </ProtectedRoute>
               }
             />

@@ -1,21 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const CommentsSection = ({ eventId }) => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const handleAddComment = (e) => {
+    useEffect(() => {
+        loadComments();
+    }, [eventId]);
+
+    const loadComments = async () => {
+        try {
+            const response = await axios.get(`/api/events/${eventId}/comments`);
+            setComments(response.data);
+        } catch (err) {
+            console.error("Failed to load comments", err);
+        }
+    };
+
+    const handleAddComment = async (e) => {
         e.preventDefault();
-        if (newComment.trim() === "") return;
+        if (newComment.trim() === "" || loading) return;
 
-        const comment = {
-            id: Date.now(),
-            text: newComment,
-            createdAt: new Date().toLocaleString(),
-        };
-
-        setComments([...comments, comment]);
-        setNewComment("");
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            await axios.post(`/api/events/${eventId}/comments`, {
+                text: newComment
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            setNewComment("");
+            await loadComments(); // Refresh comments
+        } catch (err) {
+            console.error("Failed to add comment", err);
+            alert("Failed to add comment");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -114,8 +138,8 @@ const CommentsSection = ({ eventId }) => {
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ marginBottom: "4px" }}>
-                                            <span style={{ fontWeight: "700", color: "#333", marginRight: "6px", fontSize: "13px" }}>{eventId || 'User'}</span>
-                                            <small style={{ color: "#888", fontSize: "11px" }}>{comment.createdAt}</small>
+                                            <span style={{ fontWeight: "700", color: "#333", marginRight: "6px", fontSize: "13px" }}>{comment.user?.name || 'User'}</span>
+                                            <small style={{ color: "#888", fontSize: "11px" }}>{new Date(comment.createdAt).toLocaleDateString()}</small>
                                         </div>
                                         <p style={{ 
                                             margin: "0", 
@@ -189,7 +213,7 @@ const CommentsSection = ({ eventId }) => {
                             e.target.style.boxShadow = "0 2px 8px rgba(102, 126, 234, 0.3)";
                         }}
                     >
-                        Post Comment 🚀
+                        {loading ? "Posting..." : "Post Comment 🚀"}
                     </button>
                 </div>
             </div>
