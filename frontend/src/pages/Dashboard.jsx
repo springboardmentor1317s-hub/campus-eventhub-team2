@@ -486,7 +486,7 @@ export default function Dashboard() {
         <div style={headerContainer}>
           <h1 style={headerStyle}>
             {user.role === "college_admin" ? "🎯 Admin Dashboard" : 
-             user.role === "superadmin" ? "🔧 Superadmin Dashboard" : "🎓 Student Dashboard"}
+             user.role === "superadmin" ? "🔧 Super Admin Dashboard" : "🎓 Student Dashboard"}
           </h1>
           <h2 style={welcomeStyle}>Welcome back, {user.name}! 👋</h2>
         </div>
