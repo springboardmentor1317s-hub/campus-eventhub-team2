@@ -562,7 +562,7 @@ export default function Dashboard() {
             
             <div style={{ textAlign: "center" }}>
               <button
-                onClick={() => navigate("/superadmin-dashboard")}
+                onClick={() => navigate("/superadmin")}
                 style={{
                   padding: "15px 30px",
                   background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
