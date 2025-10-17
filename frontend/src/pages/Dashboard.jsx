@@ -495,7 +495,7 @@ export default function Dashboard() {
         {user.role === "superadmin" && (
           <>
             <div style={{ textAlign: "center", marginBottom: "30px" }}>
-              <h2 style={{ color: "#4a5568", marginBottom: "10px" }}>Welcome back, Super! 👋</h2>
+              <h2 style={{ color: "#4a5568", marginBottom: "10px" }}>Welcome back, Mate! 👋</h2>
               <p style={{ color: "#718096" }}>Here's an overview of event activity across all colleges.</p>
             </div>
             
