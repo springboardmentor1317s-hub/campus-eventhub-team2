@@ -7,7 +7,7 @@ const router = express.Router();
 // Middleware to check if user is superadmin
 const requireSuperadmin = (req, res, next) => {
   if (req.user.role !== "superadmin") {
-    return res.status(403).json({ error: "Access denied. Superadmin only." });
+    return res.status(403).json({ error: "Access denied. Access for Superadmin only." });
   }
   next();
 };
@@ -58,7 +58,7 @@ router.delete("/reject-user/:userId", authenticateToken, requireSuperadmin, asyn
       return res.status(404).json({ error: "User not found" });
     }
     
-    res.json({ message: "User rejected and removed" });
+    res.json({ message: "User rejected and removed!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -73,7 +73,7 @@ router.delete("/delete-user/:userId", authenticateToken, requireSuperadmin, asyn
       return res.status(404).json({ error: "User not found" });
     }
     
-    res.json({ message: "User deleted successfully" });
+    res.json({ message: "User deleted successfully!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -110,7 +110,7 @@ router.delete("/delete-event/:eventId", authenticateToken, requireSuperadmin, as
       return res.status(404).json({ error: "Event not found" });
     }
     
-    res.json({ message: "Event deleted successfully" });
+    res.json({ message: "Event deleted successfully!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

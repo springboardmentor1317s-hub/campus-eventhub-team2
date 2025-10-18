@@ -9,8 +9,7 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-// =========================================================
-// 📌 Get events registered by the current user
+//  Get events registered by the current user
 // =========================================================
 router.get("/my-registered", authMiddleware, async (req, res) => {
   try {
@@ -24,8 +23,8 @@ router.get("/my-registered", authMiddleware, async (req, res) => {
   }
 });
 
-// =============================
-// 📌 Create Event (Admin Only)
+
+//  Create Event (Admin Only)
 // =============================
 router.post("/", authMiddleware, roleMiddleware(["college_admin"]), async (req, res) => {
   try {
@@ -45,7 +44,7 @@ router.post("/", authMiddleware, roleMiddleware(["college_admin"]), async (req, 
     }
 
     const newEvent = new Event({
-      collegeId: req.user.id, // ✅ auto attach admin who created it
+      collegeId: req.user.id, //  auto attach admin who created it
       title,
       description,
       category,
@@ -65,8 +64,8 @@ router.post("/", authMiddleware, roleMiddleware(["college_admin"]), async (req, 
   }
 });
 
-// =============================
-// 📌 Update Event (Admin Only)
+
+//  Update Event (Admin Only)
 // =============================
 router.put("/:eventId", authMiddleware, roleMiddleware(["college_admin"]), async (req, res) => {
   try {
@@ -99,8 +98,8 @@ router.put("/:eventId", authMiddleware, roleMiddleware(["college_admin"]), async
   }
 });
 
-// =============================
-// 📌 Get Events Created by Admin
+
+//  Get Events Created by Admin
 // =============================
 router.get("/my-events", authMiddleware, roleMiddleware(["college_admin"]), async (req, res) => {
   try {
@@ -119,8 +118,8 @@ router.get("/my-events", authMiddleware, roleMiddleware(["college_admin"]), asyn
   }
 });
 
-// =============================
-// 📌 Get Single Event by ID
+
+//  Get Single Event by ID
 // =============================
 router.get("/:eventId", async (req, res) => {
   try {
@@ -135,8 +134,7 @@ router.get("/:eventId", async (req, res) => {
   }
 });
 
-// =============================
-// 📌 Get Comments for Event
+// Get Comments for Event
 // =============================
 router.get("/:eventId/comments", async (req, res) => {
   try {
@@ -149,8 +147,8 @@ router.get("/:eventId/comments", async (req, res) => {
   }
 });
 
-// =============================
-// 📌 Add Comment to Event
+
+//  Add Comment to Event
 // =============================
 router.post("/:eventId/comments", authMiddleware, async (req, res) => {
   try {
@@ -169,8 +167,8 @@ router.post("/:eventId/comments", authMiddleware, async (req, res) => {
   }
 });
 
-// =============================
-// 📌 Rate Event
+
+//  Rate Event
 // =============================
 router.post("/:eventId/rate", authMiddleware, async (req, res) => {
   try {
@@ -188,8 +186,8 @@ router.post("/:eventId/rate", authMiddleware, async (req, res) => {
   }
 });
 
-// =============================
-// 📌 Get Event Ratings
+
+//  Get Event Ratings
 // =============================
 router.get("/:eventId/ratings", async (req, res) => {
   try {
@@ -206,8 +204,8 @@ router.get("/:eventId/ratings", async (req, res) => {
   }
 });
 
-// =============================
-// 📌 Get All Upcoming Events (For Students)
+
+//  Get All Upcoming Events (For Students)
 // =============================
 router.get("/", async (req, res) => {
   try {
