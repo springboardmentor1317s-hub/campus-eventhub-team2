@@ -10,9 +10,9 @@ export default function SuperadminDashboard() {
   const [activeTab, setActiveTab] = useState("pending"); // Current active tab (pending/users/events)
   const [userFilter, setUserFilter] = useState("all"); // Filter option for users
   const [eventFilter, setEventFilter] = useState("all"); // Filter option for events
-  const API = "http://localhost:5000/api"; // Backend API base URL
+  const API = "http://localhost:5000/api"; 
 
-  //  useEffect - runs when component loads
+  
   // Checks superadmin access and loads users/events data
   useEffect(() => {
     const role = localStorage.getItem("role");
@@ -182,7 +182,7 @@ export default function SuperadminDashboard() {
           🔧 Superadmin Dashboard
         </h1>
 
-        {/* 🧭 Tab Navigation */}
+        {/*  Tab Navigation */}
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
           <button
             style={{
