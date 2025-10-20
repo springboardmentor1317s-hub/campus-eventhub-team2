@@ -1,9 +1,9 @@
-// 🧩 Imports
+//  Imports
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function SuperadminDashboard() {
-  // 🧠 State Variables
+  //  State Variables
   const [pendingAdmins, setPendingAdmins] = useState([]); // Pending admin approvals
   const [allUsers, setAllUsers] = useState([]); // List of all users
   const [allEvents, setAllEvents] = useState([]); // List of all events
@@ -12,7 +12,7 @@ export default function SuperadminDashboard() {
   const [eventFilter, setEventFilter] = useState("all"); // Filter option for events
   const API = "http://localhost:5000/api"; // Backend API base URL
 
-  // ⚙️ useEffect - runs when component loads
+  //  useEffect - runs when component loads
   // Checks superadmin access and loads users/events data
   useEffect(() => {
     const role = localStorage.getItem("role");
@@ -25,7 +25,7 @@ export default function SuperadminDashboard() {
     loadAllEvents();
   }, []);
 
-  // 📥 Load pending admin approval requests
+  //  Load pending admin approval requests
   const loadPendingUsers = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -38,7 +38,7 @@ export default function SuperadminDashboard() {
     }
   };
 
-  // 📋 Load all users
+  //  Load all users
   const loadAllUsers = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -51,7 +51,7 @@ export default function SuperadminDashboard() {
     }
   };
 
-  // ✅ Approve user request
+  //  Approve user request
   const approveUser = async (userId) => {
     try {
       const token = localStorage.getItem("token");
@@ -66,7 +66,7 @@ export default function SuperadminDashboard() {
     }
   };
 
-  // ❌ Reject user request
+  //  Reject user request
   const rejectUser = async (userId) => {
     if (window.confirm("Are you sure you want to reject this user?")) {
       try {
@@ -99,7 +99,7 @@ export default function SuperadminDashboard() {
     }
   };
 
-  // 🗑️ Delete event permanently
+  //  Delete event permanently
   const deleteEvent = async (eventId) => {
     if (window.confirm("Are you sure you want to delete this event?")) {
       try {
@@ -115,7 +115,7 @@ export default function SuperadminDashboard() {
     }
   };
 
-  // 📦 Load all events
+  //  Load all events
   const loadAllEvents = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -128,7 +128,7 @@ export default function SuperadminDashboard() {
     }
   };
 
-  // 🎨 Styling Objects
+  //  Styling Objects
   const containerStyle = {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%)",
@@ -173,7 +173,7 @@ export default function SuperadminDashboard() {
     fontWeight: "600",
   };
 
-  // 🖼️ JSX Return Section
+  //  JSX Return Section
   // Contains: Tabs for pending admins, all users, and all events
   return (
     <div style={containerStyle}>
@@ -216,7 +216,7 @@ export default function SuperadminDashboard() {
           </button>
         </div>
 
-        {/* ⏳ Pending Admins Tab */}
+        {/*  Pending Admins Tab */}
         {activeTab === "pending" && (
           <div style={cardStyle}>
             <h2 style={{ marginBottom: "20px", color: "#2d3748" }}>⏳ Pending Admin Approvals</h2>
@@ -262,7 +262,7 @@ export default function SuperadminDashboard() {
           </div>
         )}
 
-        {/* 👥 All Users Tab */}
+        {/*  All Users Tab */}
         {activeTab === "users" && (
           <div style={cardStyle}>
             <h2 style={{ marginBottom: "20px", color: "#2d3748" }}>👥 All Users</h2>
@@ -351,7 +351,7 @@ export default function SuperadminDashboard() {
           </div>
         )}
 
-        {/* 🎉 All Events Tab */}
+        {/* All Events Tab */}
         {activeTab === "events" && (
           <div style={cardStyle}>
             <h2 style={{ marginBottom: "20px", color: "#2d3748" }}>🎉 All Events</h2>
