@@ -1,19 +1,36 @@
+
 import jwt from "jsonwebtoken";
 
+/**
+ * Authentication middleware
+ * - Checks for Bearer token in Authorization header
+ * - Verifies JWT using secret key
+ * - Attaches decoded user info to req.user
+ */
 export const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
+  // 1. Check header exists
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "No token provided" });
+    return res.status(401).json({ success: false, message: "No token provided" });
   }
 
-  const token = authHeader.split(" ")[1]; // Get token after "Bearer"
+  const token = authHeader.split(" ")[1]; // Extract the token part
+
   try {
+    // 2. Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // attach user info (id, role) to request
-    
-    next();
+
+    // 3. Attach user info to request object
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+      email: decoded.email, // if you stored email
+    };
+
+    next(); // pass control to next middleware/route
   } catch (err) {
-    res.status(401).json({ error: "Invalid or expired token" });
+    console.error("JWT verification failed:", err.message);
+    return res.status(401).json({ success: false, message: "Invalid or expired token" });
   }
 };

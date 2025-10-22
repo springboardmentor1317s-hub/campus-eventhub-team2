@@ -5,7 +5,12 @@ const eventSchema = new mongoose.Schema(
     collegeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true, // which admin created it
+      required: true, // Admin who created it
+    },
+    college: {
+      type: String,
+      required: true,
+      trim: true,
     },
     title: {
       type: String,
@@ -34,17 +39,13 @@ const eventSchema = new mongoose.Schema(
       required: true,
     },
     onlineLink: {
-      type: String, // for hybrid/online events
+      type: String,
       trim: true,
     },
-
-    // ✅ Auto-set when created
     createdAt: {
       type: Date,
       default: Date.now,
     },
-
-    // ✅ Registrations (students who registered)
     registrations: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -52,7 +53,7 @@ const eventSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true } // adds createdAt & updatedAt automatically
+  { timestamps: true }
 );
 
 export default mongoose.model("Event", eventSchema);
