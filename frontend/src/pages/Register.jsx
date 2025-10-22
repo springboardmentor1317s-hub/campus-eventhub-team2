@@ -1,6 +1,17 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
+
+const collegeOptions = [
+  { value: "IIT Bombay", label: "IIT Bombay" },
+  { value: "IIT Delhi", label: "IIT Delhi" },
+  { value: "NIT Trichy", label: "NIT Trichy" },
+  { value: "BITS Pilani", label: "BITS Pilani" },
+  { value: "Anna University", label: "Anna University" },
+ 
+];
+
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -15,10 +26,13 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/api/auth/register", form);
+      console.log("Submitting form:", form);
+      const response = await axios.post("/api/auth/register", form);
+      console.log("Registration response:", response.data);
       alert("✅ Registration successful!");
       navigate("/login");
     } catch (err) {
+      console.error("Registration error:", err.response?.data || err.message);
       alert(err.response?.data?.error || "❌ Registration failed");
     }
   };
@@ -33,7 +47,7 @@ export default function Register() {
         alignItems: "center",
         // background: "linear-gradient(135deg, #f3e8ff 0%, #e0c3fc 100%)",
         fontFamily: "Segoe UI, sans-serif",
-        overflow: "hidden", // ✅ block scrolling
+        overflow: "visible", // ✅ block scrolling
       }}
     >
       {/* Main Card */}
@@ -44,7 +58,7 @@ export default function Register() {
           maxWidth: "95%",
           backgroundColor: "#fff",
           borderRadius: "15px",
-          overflow: "hidden",
+          overflow: "visible",
           boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
         }}
       >
@@ -154,17 +168,34 @@ export default function Register() {
               </div>
 
               {/* College */}
-              <div style={{ marginBottom: "1rem" }}>
-                <label style={labelStyle}>College</label>
-                <input
-                  type="text"
-                  placeholder="Enter your college"
-                  value={form.college}
-                  onChange={(e) => setForm({ ...form, college: e.target.value })}
-                  required
-                  style={inputStyle}
-                />
-              </div>
+             <div style={{ marginBottom: "1rem" }}>
+  <label style={labelStyle}>College</label>
+  <Select
+    options={collegeOptions}
+    placeholder="Select your college"
+    value={
+      form.college
+        ? collegeOptions.find((opt) => opt.value === form.college)
+        : null
+    }
+    onChange={(selected) =>
+      setForm({ ...form, college: selected?.value || "" })
+    }
+    isSearchable
+    menuPortalTarget={document.body} // ⬅️ ensures dropdown isn't clipped
+    styles={{
+      control: (base) => ({
+        ...base,
+        borderRadius: "8px",
+        border: "1px solid #ccc",
+        fontSize: "0.95rem",
+        padding: "2px",
+      }),
+      menuPortal: (base) => ({ ...base, zIndex: 9999 }), // ⬅️ ensures visibility
+    }}
+  />
+</div>
+
 
               {/* Role */}
               <div style={{ marginBottom: "1.2rem" }}>
@@ -176,6 +207,7 @@ export default function Register() {
                 >
                   <option value="student">Student</option>
                   <option value="college_admin">College Admin</option>
+                  <option value="superadmin">Superadmin</option>
                 </select>
               </div>
 
