@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 /**
 
- * - Checks for Bearer token in Authorization header
+ 
  * - Verifies JWT using secret key
  * - Attaches decoded user info to req.user
  */
