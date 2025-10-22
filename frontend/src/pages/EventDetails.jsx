@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import CommentsSection from "../components/CommentsSection";
 
 export default function EventDetails() {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [event, setEvent] = useState(null);
   const [user, setUser] = useState(null);
   const [registeredEvents, setRegisteredEvents] = useState([]);
@@ -46,6 +47,18 @@ export default function EventDetails() {
       .catch(err => console.error("Failed to load registered events", err));
     }
   }, [eventId, navigate]);
+
+  // Scroll to comments if accessed via notification
+  useEffect(() => {
+    if (location.state?.scrollToComments || location.hash === '#comments') {
+      setTimeout(() => {
+        const commentsSection = document.getElementById('comments-section');
+        if (commentsSection) {
+          commentsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500);
+    }
+  }, [location, event]);
 
   const handleRegister = async () => {
     try {
@@ -308,7 +321,7 @@ export default function EventDetails() {
           </div>
           
           {/* Comments Section */}
-          <div style={{ marginTop: "40px", borderTop: "2px solid #e2e8f0", paddingTop: "30px" }}>
+          <div id="comments-section" style={{ marginTop: "40px", borderTop: "2px solid #e2e8f0", paddingTop: "30px" }}>
             <h3 style={sectionTitleStyle}>💬 Comments & Discussion</h3>
             <CommentsSection eventId={eventId} />
           </div>
