@@ -123,7 +123,7 @@ function Navbar() {
               {role === "superadmin" && (
                 <>
                   <Link to="/superadmin" style={linkStyle} className="nav-link">
-                    Dashboard
+                    Manage
                   </Link>
                   <Link to="/view-feedbacks" style={linkStyle} className="nav-link">
                     View Feedbacks
@@ -321,6 +321,11 @@ function Navbar() {
 
 // Styles
 const navbarStyle = {
+  position: "fixed",    
+  top: 0,               
+  width: "100%",       
+  zIndex: 1000,         
+  boxSizing: "border-box",
   padding: window.innerWidth <= 768 ? "0.8rem 1rem" : "1rem 2rem",
   background: "linear-gradient(to right, #6a11cb, #2575fc)",
   display: "flex",

@@ -121,16 +121,17 @@ export default function EventDetails() {
   const containerStyle = {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    padding: "40px 20px",
+    padding: 0,
   };
 
   const cardStyle = {
-    maxWidth: "800px",
-    margin: "0 auto",
+    width :"100%",
+    maxWidth: "none",
+    margin: 0,
     background: "white",
-    borderRadius: "20px",
+    borderRadius: 0,
     overflow: "hidden",
-    boxShadow: "0 25px 50px rgba(0, 0, 0, 0.15)",
+    
   };
 
   const headerStyle = {
@@ -140,6 +141,7 @@ export default function EventDetails() {
 
   const contentStyle = {
     padding: "40px",
+    
   };
 
   const titleStyle = {
@@ -148,6 +150,7 @@ export default function EventDetails() {
     color: "#2d3748",
     marginBottom: "15px",
     fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+    textAlign: "center",
   };
 
   const categoryStyle = {
@@ -159,6 +162,12 @@ export default function EventDetails() {
     fontSize: "1rem",
     fontWeight: "600",
     marginBottom: "20px",
+  };
+
+  const innerContentStyle = {
+    maxWidth: "800px", 
+    margin: "0 auto",   
+    textAlign: "left",  
   };
 
   const sectionStyle = {
@@ -217,9 +226,12 @@ export default function EventDetails() {
           />
         </div>
         <div style={contentStyle}>
-          <h1 style={titleStyle}>{event.title}</h1>
-          <span style={categoryStyle}>{event.category}</span>
           
+          <h1 style={titleStyle}>{event.title}</h1>
+          <div style={{ textAlign: "center" }}>
+          <span style={categoryStyle}>{event.category}</span>
+          </div>
+          <div style={innerContentStyle}>
           <div style={sectionStyle}>
             <h3 style={sectionTitleStyle}>📅 Event Dates</h3>
             <p style={textStyle}>
@@ -259,8 +271,7 @@ export default function EventDetails() {
           {/* Event Rating */}
           <div style={sectionStyle}>
             <h3 style={sectionTitleStyle}>⭐ Event Rating</h3>
-            <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px" }}>
-              <div style={{ fontSize: "1.5rem" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px" }}>              <div style={{ fontSize: "1.5rem" }}>
                 {"⭐".repeat(Math.floor(eventRatings.averageRating))}
                 {eventRatings.averageRating % 1 >= 0.5 ? "⭐" : ""}
               </div>
@@ -272,7 +283,7 @@ export default function EventDetails() {
             {user.role === "student" && (
               <div>
                 <p style={{ ...textStyle, marginBottom: "10px" }}>Rate this event:</p>
-                <div style={{ display: "flex", gap: "5px" }}>
+               <div style={{ display: "flex", gap: "5px" }}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
@@ -326,6 +337,7 @@ export default function EventDetails() {
             <CommentsSection eventId={eventId} />
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
