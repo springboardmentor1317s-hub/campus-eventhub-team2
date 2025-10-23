@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import FeedbackDisplay from "../components/FeedbackDisplay";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -164,6 +165,13 @@ export default function Home() {
           <div style={cardStyle}>⚡ Real-time Updates</div>
           <div style={cardStyle}>🤝 Student Engagement</div>
           <div style={cardStyle}>📊 Analytics for Admins</div>
+        </div>
+      </section>
+
+      {/* Feedback Section */}
+      <section style={{ padding: "3rem 2rem", backgroundColor: "#f8fafc" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <FeedbackDisplay />
         </div>
       </section>
 

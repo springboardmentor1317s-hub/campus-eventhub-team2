@@ -12,7 +12,9 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreateEvent from "./pages/CreateEvent";
 import EventList from "./pages/EventList";
+import EventDetails from "./pages/EventDetails";
 import Registrations from "./pages/Registrations"; // Admin Registrations
+import SuperadminDashboard from "./pages/SuperadminDashboard";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -20,6 +22,36 @@ import Navbar from "./components/Navbar";
 
 function App() {
   useEffect(() => {
+    // Add mobile viewport meta tag
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (!viewport) {
+      const meta = document.createElement('meta');
+      meta.name = 'viewport';
+      meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+      document.head.appendChild(meta);
+    }
+
+    // Add mobile-first CSS
+    const style = document.createElement('style');
+    style.innerHTML = `
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      @media (max-width: 768px) {
+        body {
+          font-size: 14px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
     // Listen to registration status changes from backend
     socket.on("registrationStatusChanged", (data) => {
       toast.info(data.message, { position: toast.POSITION.TOP_RIGHT });
@@ -33,17 +65,30 @@ function App() {
 
   return (
     <Router>
-      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <div style={{ 
+        display: "flex", 
+        flexDirection: "column", 
+        minHeight: "100vh",
+        width: "100%",
+        overflowX: "hidden"
+      }}>
         {/* Navbar */}
         <Navbar />
 
         {/* Page Content */}
-        <div style={{ flex: 1 }}>
+        <div style={{ 
+          flex: 1,
+          width: "100%",
+          padding: "0",
+          margin: "0",
+          paddingTop: "100px"
+        }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/events" element={<EventList />} />
+            <Route path="/event-details/:eventId" element={<EventDetails />} />
 
             {/* Student or Admin */}
             <Route
@@ -71,6 +116,16 @@ function App() {
               element={
                 <ProtectedRoute role="college_admin">
                   <Registrations />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Superadmin Dashboard */}
+            <Route
+              path="/superadmin"
+              element={
+                <ProtectedRoute role="superadmin">
+                  <SuperadminDashboard />
                 </ProtectedRoute>
               }
             />

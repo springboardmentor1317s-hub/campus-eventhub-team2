@@ -248,7 +248,6 @@ function Registrations() {
 // Styles
 const containerStyle = {
   padding: "2rem",
-  maxWidth: "1200px",
   margin: "0 auto",
   fontFamily: "'Segoe UI', sans-serif",
 };
@@ -285,7 +284,7 @@ const noDataStyle = {
 
 const gridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+  gridTemplateColumns: "1fr",
   gap: "1.5rem",
 };
 
