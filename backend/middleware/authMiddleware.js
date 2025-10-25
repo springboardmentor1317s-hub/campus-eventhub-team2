@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 
 /**
- * Authentication middleware
- * - Checks for Bearer token in Authorization header
+
+ 
  * - Verifies JWT using secret key
  * - Attaches decoded user info to req.user
  */
@@ -14,7 +14,7 @@ export const authMiddleware = (req, res, next) => {
     return res.status(401).json({ success: false, message: "No token provided" });
   }
 
-  const token = authHeader.split(" ")[1]; // Extract the token part
+  const token = authHeader.split(" ")[1]; 
 
   try {
     // 2. Verify token
@@ -24,7 +24,7 @@ export const authMiddleware = (req, res, next) => {
     req.user = {
       id: decoded.id,
       role: decoded.role,
-      email: decoded.email, // if you stored email
+      email: decoded.email, 
     };
 
     next(); // pass control to next middleware/route

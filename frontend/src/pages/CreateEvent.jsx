@@ -13,7 +13,7 @@ const collegeOptions = [
 ];
 
 export default function CreateEvent() {
-  // Add focus/blur handlers for input styling
+  
   const handleInputFocus = (e) => {
     e.target.style.borderColor = "#1e40af";
     e.target.style.boxShadow = "0 4px 12px rgba(30, 64, 175, 0.15)";

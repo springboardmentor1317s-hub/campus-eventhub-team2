@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 function Registrations() {
   const [registrations, setRegistrations] = useState([]);
-  const [allRegistrations, setAllRegistrations] = useState([]); // Store all data
+  const [allRegistrations, setAllRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("pending"); // pending, approved, rejected, all
 

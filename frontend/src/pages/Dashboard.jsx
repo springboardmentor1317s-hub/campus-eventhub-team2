@@ -495,7 +495,7 @@ export default function Dashboard() {
         {user.role === "superadmin" && (
           <>
             <div style={{ textAlign: "center", marginBottom: "30px" }}>
-              <h2 style={{ color: "#4a5568", marginBottom: "10px" }}>Welcome back, Super! 👋</h2>
+              <h2 style={{ color: "#4a5568", marginBottom: "10px" }}>Welcome back, Mate! 👋</h2>
               <p style={{ color: "#718096" }}>Here's an overview of event activity across all colleges.</p>
             </div>
             
@@ -562,7 +562,7 @@ export default function Dashboard() {
             
             <div style={{ textAlign: "center" }}>
               <button
-                onClick={() => navigate("/superadmin-dashboard")}
+                onClick={() => navigate("/superadmin")}
                 style={{
                   padding: "15px 30px",
                   background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",

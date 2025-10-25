@@ -5,7 +5,7 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-// ==========================
+
 // REGISTER
 // ==========================
 router.post("/register", async (req, res) => {
@@ -15,13 +15,13 @@ router.post("/register", async (req, res) => {
 
     // Validate required fields
     if (!name || !email || !password || !role) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ error: "All Fields are required!" });
     }
 
     // Check if email already exists
     const existing = await User.findOne({ email });
     if (existing) {
-      return res.status(400).json({ error: "Email already registered" });
+      return res.status(400).json({ error: "Email already registered!" });
     }
 
     // Hash password
@@ -60,7 +60,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ==========================
+
 // UPDATE PROFILE
 // ==========================
 router.put("/update-profile", async (req, res) => {
@@ -91,7 +91,7 @@ router.put("/update-profile", async (req, res) => {
   }
 });
 
-// ==========================
+
 // LOGIN
 // ==========================
 router.post("/login", async (req, res) => {
@@ -108,7 +108,7 @@ router.post("/login", async (req, res) => {
     
     // Check if admin is approved
     if (user.role === "college_admin" && !user.isApproved) {
-      return res.status(403).json({ error: "Admin account pending superadmin approval" });
+      return res.status(403).json({ error: "Admin account pending,need superadmin approval" });
     }
 
     // Generate JWT
@@ -118,7 +118,7 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    // ✅ Send back userId along with other info
+    //  Send back userId along with other info
     res.json({
       token,
       userId: user._id,    // ✅ critical for socket.io

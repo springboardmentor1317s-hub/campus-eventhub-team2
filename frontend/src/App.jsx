@@ -88,7 +88,8 @@ function App() {
           flex: 1,
           width: "100%",
           padding: "0",
-          margin: "0"
+          margin: "0",
+          paddingTop: window.innerWidth <= 768 ? "75px" : "95px"
         }}>
           <Routes>
             <Route path="/" element={<Home />} />
