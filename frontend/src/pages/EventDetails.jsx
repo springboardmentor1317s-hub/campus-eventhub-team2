@@ -149,6 +149,21 @@ export default function EventDetails() {
     }
   };
 
+  const createSparkles = () => {
+    const sparkleContainer = document.createElement('div');
+    sparkleContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999';
+    document.body.appendChild(sparkleContainer);
+    
+    for(let i = 0; i < 15; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.innerHTML = '✨';
+      sparkle.style.cssText = `position:absolute;font-size:${Math.random()*20+15}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation:sparkleBlast 3s ease-out forwards`;
+      sparkleContainer.appendChild(sparkle);
+    }
+    
+    setTimeout(() => document.body.removeChild(sparkleContainer), 3000);
+  };
+
   const handleRating = async (rating) => {
     try {
       const token = localStorage.getItem("token");
@@ -158,6 +173,7 @@ export default function EventDetails() {
       setUserRating(rating);
       const res = await axios.get(`${API}/events/${eventId}/ratings`);
       setEventRatings(res.data);
+      createSparkles();
       alert("✅ Rating submitted!");
     } catch (err) {
       alert("❌ Failed to submit rating");
@@ -179,12 +195,11 @@ export default function EventDetails() {
   const isRegistered = registeredEvents.find(r => r.event._id === eventId);
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", padding: 0 }}>
-      <div style={{ width: "100%", maxWidth: "none", margin: 0, background: "white", borderRadius: 0, overflow: "hidden" }}>
-        <div style={{ position: "relative", height: "300px" }}>
-          <img src={getEventImage(event.category)} alt={event.category} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        </div>
-        <div style={{ padding: "40px" }}>
+    <div style={{ minHeight: "100vh", background: "white", padding: 0 }}>
+      <div style={{ position: "relative", height: "300px" }}>
+        <img src={getEventImage(event.category)} alt={event.category} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </div>
+      <div>
           <h1 style={{ fontSize: "2.5rem", fontWeight: "700", color: "#2d3748", marginBottom: "15px", textAlign: "center" }}>{event.title}</h1>
           <div style={{ textAlign: "center" }}>
             <span style={{ display: "inline-block", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white", padding: "8px 20px", borderRadius: "25px", fontSize: "1rem", fontWeight: "600", marginBottom: "20px" }}>
@@ -192,62 +207,130 @@ export default function EventDetails() {
             </span>
           </div>
 
-          <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "left" }}>
-            <div style={{ marginBottom: "25px" }}>
-              <h3 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#4a5568", marginBottom: "10px" }}>📅 Event Dates</h3>
-              <p style={{ color: "#718096", lineHeight: "1.6", fontSize: "1.1rem" }}>
-                <strong>Start:</strong> {new Date(event.startDate).toLocaleDateString()} at {new Date(event.startDate).toLocaleTimeString()}<br/>
-                <strong>End:</strong> {new Date(event.endDate).toLocaleDateString()} at {new Date(event.endDate).toLocaleTimeString()}
-              </p>
+          <div style={{ width: "100%", margin: 0, textAlign: "left", padding: "0 20px" }}>
+            <style>{`
+              @media (max-width: 768px) {
+                .event-grid { grid-template-columns: 1fr !important; }
+                .event-section { padding: 15px !important; margin-bottom: 20px !important; }
+                .event-title { font-size: 1.2rem !important; }
+                .event-content { font-size: 1rem !important; }
+                .button-container { flex-direction: column !important; gap: 10px !important; }
+                .event-button { width: 100% !important; margin-right: 0 !important; }
+              }
+            `}</style>
+            <div className="event-section" style={{ marginBottom: "30px", padding: "20px", background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)", borderRadius: "15px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}>
+              <h3 className="event-title" style={{ fontSize: "1.4rem", fontWeight: "700", color: "#2d3748", marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>📅 Event Schedule</h3>
+              <div className="event-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
+                <div style={{ padding: "15px", background: "white", borderRadius: "10px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ color: "#48bb78", fontWeight: "600", fontSize: "0.9rem", marginBottom: "5px" }}>🚀 START</div>
+                  <div style={{ color: "#2d3748", fontWeight: "600", fontSize: "1.1rem" }}>{new Date(event.startDate).toLocaleDateString()}</div>
+                  <div style={{ color: "#718096", fontSize: "0.95rem" }}>{new Date(event.startDate).toLocaleTimeString()}</div>
+                </div>
+                <div style={{ padding: "15px", background: "white", borderRadius: "10px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ color: "#f56565", fontWeight: "600", fontSize: "0.9rem", marginBottom: "5px" }}>🏁 END</div>
+                  <div style={{ color: "#2d3748", fontWeight: "600", fontSize: "1.1rem" }}>{new Date(event.endDate).toLocaleDateString()}</div>
+                  <div style={{ color: "#718096", fontSize: "0.95rem" }}>{new Date(event.endDate).toLocaleTimeString()}</div>
+                </div>
+              </div>
             </div>
 
             {event.description && (
-              <div style={{ marginBottom: "25px" }}>
-                <h3 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#4a5568", marginBottom: "10px" }}>📝 Description</h3>
-                <p style={{ color: "#718096", lineHeight: "1.6", fontSize: "1.1rem" }}>{event.description}</p>
+              <div className="event-section" style={{ marginBottom: "30px", padding: "20px", background: "linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%)", borderRadius: "15px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}>
+                <h3 className="event-title" style={{ fontSize: "1.4rem", fontWeight: "700", color: "#2d3748", marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>📝 About This Event</h3>
+                <p className="event-content" style={{ color: "#4a5568", lineHeight: "1.7", fontSize: "1.1rem", margin: 0, fontStyle: "italic" }}>"{event.description}"</p>
               </div>
             )}
 
             {event.location && (
-              <div style={{ marginBottom: "25px" }}>
-                <h3 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#4a5568", marginBottom: "10px" }}>📍 Location</h3>
-                <p style={{ color: "#718096", lineHeight: "1.6", fontSize: "1.1rem" }}>{event.location}</p>
+              <div className="event-section" style={{ marginBottom: "30px", padding: "20px", background: "linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%)", borderRadius: "15px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}>
+                <h3 className="event-title" style={{ fontSize: "1.4rem", fontWeight: "700", color: "#2d3748", marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>📍 Venue</h3>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px", background: "white", borderRadius: "10px" }}>
+                  <div style={{ fontSize: "1.5rem" }}>🏢</div>
+                  <span style={{ color: "#2d3748", fontWeight: "600", fontSize: "1.2rem" }}>{event.location}</span>
+                </div>
               </div>
             )}
 
             {event.maxParticipants && (
-              <div style={{ marginBottom: "25px" }}>
-                <h3 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#4a5568", marginBottom: "10px" }}>👥 Capacity</h3>
-                <p style={{ color: "#718096", lineHeight: "1.6", fontSize: "1.1rem" }}>{event.maxParticipants} participants</p>
+              <div className="event-section" style={{ marginBottom: "30px", padding: "20px", background: "linear-gradient(135deg, #fffaf0 0%, #fbd38d 100%)", borderRadius: "15px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}>
+                <h3 className="event-title" style={{ fontSize: "1.4rem", fontWeight: "700", color: "#2d3748", marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>👥 Capacity</h3>
+                <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                  <div style={{ fontSize: "2rem" }}>🎯</div>
+                  <span style={{ color: "#2d3748", fontWeight: "600", fontSize: "1.3rem" }}>{event.maxParticipants} participants</span>
+                </div>
               </div>
             )}
 
             {event.organizer && (
-              <div style={{ marginBottom: "25px" }}>
-                <h3 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#4a5568", marginBottom: "10px" }}>👤 Organizer</h3>
-                <p style={{ color: "#718096", lineHeight: "1.6", fontSize: "1.1rem" }}>{event.organizer}</p>
+              <div className="event-section" style={{ marginBottom: "30px", padding: "20px", background: "linear-gradient(135deg, #f7fafc 0%, #cbd5e0 100%)", borderRadius: "15px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}>
+                <h3 className="event-title" style={{ fontSize: "1.4rem", fontWeight: "700", color: "#2d3748", marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px" }}>👤 Event Organizer</h3>
+                <div style={{ display: "flex", alignItems: "center", gap: "15px", padding: "10px", background: "white", borderRadius: "10px" }}>
+                  <div style={{ width: "50px", height: "50px", borderRadius: "50%", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>👨‍💼</div>
+                  <span style={{ color: "#2d3748", fontWeight: "600", fontSize: "1.2rem" }}>{event.organizer}</span>
+                </div>
               </div>
             )}
 
             {/* Animated Event Rating */}
-            <div style={{ marginBottom: "25px" }}>
-              <h3 style={{ fontSize: "1.3rem", fontWeight: "600", color: "#4a5568", marginBottom: "10px" }}>⭐ Event Rating</h3>
-              <div style={{ marginBottom: "10px" }}>
+            <div className="event-section" style={{ marginBottom: "30px", padding: "25px", background: "linear-gradient(135deg, #fef5e7 0%, #f6e05e 100%)", borderRadius: "15px", boxShadow: "0 6px 20px rgba(0,0,0,0.15)", textAlign: "center" }}>
+              <h3 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#2d3748", marginBottom: "20px", animation: "fadeInUp 0.6s ease-out" }}>⭐ Community Rating</h3>
+              <div style={{ marginBottom: "15px", animation: "fadeInUp 0.8s ease-out" }}>
                 <StarRating
-                  rating={userRating}
+                  rating={Math.round(eventRatings.averageRating)}
                   onRate={handleRating}
                   readOnly={user.role !== "student"}
                 />
               </div>
-              <span style={{ fontSize: "1.2rem", fontWeight: "600", color: "#4a5568" }}>
-                {eventRatings.averageRating.toFixed(1)} ({eventRatings.totalRatings} ratings)
-              </span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+                <span style={{ fontSize: "2rem", fontWeight: "700", color: "#d69e2e", animation: "fadeInUp 1s ease-out, pulse 2s infinite" }}>
+                  {Math.round(eventRatings.averageRating)}
+                </span>
+                <span style={{ color: "#744210", fontSize: "1.1rem", fontWeight: "600" }}>/ 5 stars</span>
+              </div>
             </div>
+            
+            <style>{`
+              @keyframes fadeInUp {
+                from {
+                  opacity: 0;
+                  transform: translateY(30px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
+              }
+              
+              @keyframes pulse {
+                0%, 100% {
+                  transform: scale(1);
+                }
+                50% {
+                  transform: scale(1.05);
+                }
+              }
+              
+              @keyframes sparkleBlast {
+                0% {
+                  opacity: 1;
+                  transform: scale(0) rotate(0deg);
+                }
+                50% {
+                  opacity: 1;
+                  transform: scale(1.5) rotate(180deg);
+                }
+                100% {
+                  opacity: 0;
+                  transform: scale(0) rotate(360deg) translateY(-100px);
+                }
+              }
+            `}</style>
 
             {/* Register / Status Buttons */}
-            <div style={{ marginTop: "40px", display: "flex", alignItems: "center" }}>
+            <div className="button-container" style={{ marginTop: "40px", display: "flex", alignItems: "center" }}>
               {user.role === "student" && !isRegistered && (
                 <button
+                  className="event-button"
                   style={{
                     padding: "15px 30px",
                     background: "linear-gradient(135deg, #48bb78 0%, #38a169 100%)",
@@ -279,6 +362,7 @@ export default function EventDetails() {
                 </div>
               )}
               <button
+                className="event-button"
                 style={{
                   padding: "15px 30px",
                   background: "#f7fafc",
@@ -302,7 +386,6 @@ export default function EventDetails() {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 }

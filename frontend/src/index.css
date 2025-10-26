@@ -37,6 +37,26 @@ body {
   min-height: 90vh;
 }
 
+/* Base responsive container */
+.responsive-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+@media (max-width: 768px) {
+  .responsive-container {
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-container {
+    padding: 0 10px;
+  }
+}
+
 h1 {
   font-size: 2.5rem;
   line-height: 1.2;
@@ -107,4 +127,103 @@ button:focus-visible {
 *:focus {
   outline: 2px solid #667eea;
   outline-offset: 2px;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  html, body {
+    font-size: 14px;
+  }
+  
+  h1 {
+    font-size: 1.8rem !important;
+  }
+  
+  h2 {
+    font-size: 1.3rem !important;
+  }
+  
+  h3 {
+    font-size: 1.1rem !important;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  /* Container padding */
+  .container {
+    padding: 0 15px !important;
+  }
+  
+  /* Card styles */
+  .card {
+    margin: 10px 0 !important;
+    padding: 15px !important;
+  }
+  
+  /* Form styles */
+  input, textarea, select {
+    width: 100% !important;
+    padding: 12px !important;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    box-sizing: border-box;
+  }
+  
+  /* Table responsive */
+  table {
+    font-size: 0.8rem;
+    overflow-x: auto;
+    display: block;
+    white-space: nowrap;
+  }
+  
+  /* Navigation */
+  .navbar {
+    padding: 10px 15px !important;
+  }
+  
+  .navbar-brand {
+    font-size: 1.2rem !important;
+  }
+  
+  /* Grid layouts */
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+  
+  /* Flex layouts */
+  .flex-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  /* Modal */
+  .modal {
+    margin: 10px !important;
+    width: calc(100% - 20px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  html, body {
+    font-size: 13px;
+  }
+  
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .container {
+    padding: 0 10px !important;
+  }
+  
+  button {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
 }
