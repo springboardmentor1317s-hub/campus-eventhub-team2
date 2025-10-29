@@ -1,3 +1,4 @@
+
 // backend/server.js
 import express from "express";
 import mongoose from "mongoose";
@@ -15,6 +16,8 @@ import registrationRoutes from "./routes/registrationRoutes.js";
 import adminRoutes from "./routes/admin.js";
 import superadminRoutes from "./routes/superadminRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import { setSocketIO } from "./utils/socketManager.js";
 
 dotenv.config();
 const app = express();
@@ -46,6 +49,7 @@ app.use("/api/registrations", registrationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/superadmin", superadminRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Health check
 app.get("/", (req, res) => res.send("✅ Campus Event Hub Backend running!"));
@@ -54,13 +58,16 @@ app.get("/", (req, res) => res.send("✅ Campus Event Hub Backend running!"));
 io.on("connection", (socket) => {
   console.log("⚡ Client connected:", socket.id);
 
-  socket.on("joinStudent", (studentId) => {
-    socket.join(studentId);
-    console.log(`📢 Student ${studentId} joined notifications`);
+  socket.on("joinUser", (userId) => {
+    socket.join(userId);
+    console.log(`📢 User ${userId} joined notifications`);
   });
 
   socket.on("disconnect", () => console.log("❌ Client disconnected:", socket.id));
 });
+
+// Set socket instance for other modules
+setSocketIO(io);
 
 // Example: Admin approves registration
 app.post("/api/registration/:id/approve", async (req, res) => {

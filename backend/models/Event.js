@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const eventSchema = new mongoose.Schema(
@@ -5,7 +6,7 @@ const eventSchema = new mongoose.Schema(
     collegeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true, // Admin who created it
+      required: true, 
     },
     college: {
       type: String,

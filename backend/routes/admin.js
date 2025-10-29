@@ -1,3 +1,4 @@
+
 // routes/admin.js
 import express from "express";
 import Registration from "../models/Registration.js";
