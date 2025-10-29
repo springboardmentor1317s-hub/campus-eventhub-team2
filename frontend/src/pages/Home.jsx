@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import FeedbackDisplay from "../components/FeedbackDisplay";
@@ -5,13 +6,13 @@ import FeedbackDisplay from "../components/FeedbackDisplay";
 export default function Home() {
   const navigate = useNavigate();
 
-  // 🔹 Hero section style
+  //  Hero section style
   const homeStyle = {
     height: "100vh",
     width: "100vw",
     margin: 0,
     padding: 0,
-    backgroundImage: "url('/ap.jpg')", // ✅ place ap.jpg in /public
+    backgroundImage: "url('/ap.jpg')", 
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",
@@ -30,7 +31,7 @@ export default function Home() {
     left: 0,
     width: "100%",
     height: "100%",
-    backgroundColor: "rgba(0,0,0,0.5)", // ✅ dark overlay
+    backgroundColor: "rgba(0,0,0,0.5)",
     zIndex: 0,
   };
 
@@ -46,7 +47,7 @@ export default function Home() {
       <section style={homeStyle}>
         <div style={overlayStyle}></div>
         <div style={contentStyle}>
-          {/* ✅ Animated Title */}
+          {/*  Animated Title */}
           <h1 className="animated-title">🎓 Campus Event Hub</h1>
 
           <p
@@ -96,7 +97,7 @@ export default function Home() {
             color: "#333",
           }}
         >
-          📌 Core Modules
+           Core Modules
         </h2>
         <div
           style={{
@@ -191,7 +192,7 @@ export default function Home() {
   );
 }
 
-// ✅ Reusable Styles
+//  Reusable Styles
 const cardStyle = {
   background: "#fff",
   padding: "2rem",
@@ -212,7 +213,7 @@ const cardText = {
   lineHeight: "1.5rem",
 };
 
-// ✅ Animation styles injected globally
+//  Animation styles injected globally
 const style = document.createElement("style");
 style.innerHTML = `
   .animated-title {

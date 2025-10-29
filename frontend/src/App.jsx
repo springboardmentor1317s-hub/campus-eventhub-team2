@@ -1,9 +1,10 @@
+
 // frontend/src/App.jsx
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { socket } from "./socket";
+import { socket, joinUserNotifications } from "./socket";
 
 // Pages
 import Home from "./pages/Home";
@@ -15,10 +16,12 @@ import EventList from "./pages/EventList";
 import EventDetails from "./pages/EventDetails";
 import Registrations from "./pages/Registrations"; // Admin Registrations
 import SuperadminDashboard from "./pages/SuperadminDashboard";
+import ViewFeedbacks from "./pages/ViewFeedbacks";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 function App() {
   useEffect(() => {
@@ -52,6 +55,12 @@ function App() {
     `;
     document.head.appendChild(style);
 
+    // Initialize socket connection for logged-in users
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      joinUserNotifications(userId);
+    }
+
     // Listen to registration status changes from backend
     socket.on("registrationStatusChanged", (data) => {
       toast.info(data.message, { position: toast.POSITION.TOP_RIGHT });
@@ -80,7 +89,8 @@ function App() {
           flex: 1,
           width: "100%",
           padding: "0",
-          margin: "0"
+          margin: "0",
+          paddingTop: window.innerWidth <= 768 ? "75px" : "95px"
         }}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -128,8 +138,21 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* View Feedbacks */}
+            <Route
+              path="/view-feedbacks"
+              element={
+                <ProtectedRoute role="superadmin">
+                  <ViewFeedbacks />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </div>
+
+        {/* Footer */}
+        <Footer />
 
         {/* Toast Container */}
         <ToastContainer />

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -13,7 +14,7 @@ export default function EventList() {
       .catch((err) => console.error("Failed to load events", err));
   }, []);
 
-  // ✅ Filtering
+  //  Filtering
   const filteredEvents =
     filterCategory === "all"
       ? events
@@ -21,7 +22,7 @@ export default function EventList() {
           (event) => event.category.toLowerCase() === filterCategory.toLowerCase()
         );
 
-  // ✅ Sorting
+  //  Sorting
   const sortedEvents = [...filteredEvents].sort((a, b) => {
     if (sortOption === "date") {
       return new Date(a.startDate) - new Date(b.startDate);
@@ -84,7 +85,7 @@ export default function EventList() {
                 />
               </div>
 
-              {/* ✅ Right side details */}
+              {/*  Right side details */}
               <div style={{ flex: "2", paddingLeft: "1rem" }}>
                 <h3 style={{ margin: "0 0 8px" }}>{event.title}</h3>
                 <p style={{ margin: "0 0 6px", color: "#555" }}>
@@ -109,7 +110,7 @@ export default function EventList() {
   );
 }
 
-// ✅ Styles
+//  Styles
 const eventCard = {
   display: "flex",
   alignItems: "flex-start",

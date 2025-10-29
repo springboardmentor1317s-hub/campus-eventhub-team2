@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -10,16 +11,16 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // ✅ login request
+      //  login request
       const res = await axios.post("http://localhost:5000/api/auth/login", form);
 
-      // ✅ save everything to localStorage
+      //  save everything to localStorage
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("name", res.data.name);
       localStorage.setItem("role", res.data.role);
       localStorage.setItem("college", res.data.college);
 
-      // ✅ MOST IMPORTANT → save userId (needed for socket.io)
+      //  MOST IMPORTANT → save userId (needed for socket.io)
       if (res.data.userId) {
         localStorage.setItem("userId", res.data.userId);
       } else if (res.data._id) {
@@ -157,7 +158,7 @@ export default function Login() {
   );
 }
 
-// ✅ Styles
+//  Styles
 const labelStyle = {
   display: "block",
   marginBottom: "6px",

@@ -1,6 +1,7 @@
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import FeedbackForm from "./FeedbackForm"; // components folder mein jo feedback.jsx file hai uska import
+import NotificationBell from "./NotificationBell";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ function Navbar() {
   const role = localStorage.getItem("role");
   const email = localStorage.getItem("email");
   const college = localStorage.getItem("college");
-  const [showFeedback, setShowFeedback] = React.useState(false);
+
   const [showProfile, setShowProfile] = React.useState(false);
   const [editMode, setEditMode] = React.useState(false);
   const [profileData, setProfileData] = React.useState({
@@ -121,30 +122,21 @@ function Navbar() {
               )}
 
               {role === "superadmin" && (
-                <Link to="/superadmin" style={linkStyle} className="nav-link">
-                  Superadmin
-                </Link>
+                <>
+                  <Link to="/superadmin" style={linkStyle} className="nav-link">
+                    Manage
+                  </Link>
+                  <Link to="/view-feedbacks" style={linkStyle} className="nav-link">
+                    View Feedbacks
+                  </Link>
+                </>
               )}
 
-              {/* Feedback button only for students */}
-              {role === "student" && (
-                <button
-                  style={{
-                    background: "transparent",
-                    color: "white",
-                    border: "none",
-                    padding: "10px 16px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    fontSize: "0.95rem",
-                    marginRight: "8px",
-                    transition: "all 0.3s ease",
-                  }}
-                  onClick={() => setShowFeedback(true)}
-                >
-                  Feedback
-                </button>
+              {/* Notification Bell for admins */}
+              {role === "college_admin" && (
+                <div style={{ marginRight: "8px" }}>
+                  <NotificationBell />
+                </div>
               )}
 
               {/* Profile Image */}
@@ -323,49 +315,18 @@ function Navbar() {
         </div>
       </nav>
 
-      {/* Feedback Form modal for students */}
-      {showFeedback && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(0,0,0,0.35)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 999
-          }}
-          onClick={() => setShowFeedback(false)}
-        >
-          <div onClick={(e) => e.stopPropagation()}>
-            <FeedbackForm />
-            <button
-              style={{
-                marginTop: "12px",
-                background: "#e74c3c",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                padding: "6px 12px",
-                fontWeight: "bold",
-                cursor: "pointer"
-              }}
-              onClick={() => setShowFeedback(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+
     </>
   );
 }
 
 // Styles
 const navbarStyle = {
+  position: "fixed",    
+  top: 0,               
+  width: "100%",       
+  zIndex: 1000,         
+  boxSizing: "border-box",
   padding: window.innerWidth <= 768 ? "0.8rem 1rem" : "1rem 2rem",
   background: "linear-gradient(to right, #6a11cb, #2575fc)",
   display: "flex",
